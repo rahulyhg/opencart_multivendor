@@ -1,0 +1,146 @@
+{{ header }}
+<div id="account-account" class="pts-container">
+  <ul class="pts-breadcrumb">
+    {% for breadcrumb in breadcrumbs %}
+    <li><a href="{{ breadcrumb.href }}">{{ breadcrumb.text }}</a></li>
+    {% endfor %}
+  </ul>
+    {% if error_warning %}
+    <div class="alert alert-danger"><i class="fa fa-exclamation-circle"></i> {{ error_warning }}
+      <button type="button" class="close" data-dismiss="alert">&times;</button>
+    </div>
+    {% endif %}
+  {% if success %}
+  <div class="alert alert-success alert-dismissible"><i class="fa fa-check-circle"></i> {{ success }}</div>
+  {% endif %}
+  <div class="row">{{ column_left }}
+    {% if column_left and column_right %}
+    {% set class = 'pts-col-sm-6' %}
+    {% elseif column_left or column_right %}
+    {% set class = 'pts-col-sm-9' %}
+    {% else %}
+    {% set class = 'pts-col-sm-12' %}
+    {% endif %}
+    <div id="pts-content" class="{{ class }}">{{ content_top }}
+      <h2>{{ heading_title }}</h2>
+			 
+		<div class="pts-row">
+		<div class="pts-col-md-4">
+				<div class="pts-dash-box pts-dash-box1">
+					<div class="pts-box-top">
+					{{ text_sales }}
+					</div>
+					<div class="pts-box-body">
+						{{ total_sale }}
+					</div>
+					<div class="pts-box-bottom">
+					   <a  href="{{ my_orders }}">{{ text_view_more }}</a>
+					</div>
+				</div>
+			</div>
+
+			<div class="pts-col-md-4">
+				<div class="pts-dash-box pts-dash-box1">
+					<div class="pts-box-top">
+					{{ text_total_commission }}
+					</div>
+					<div class="pts-box-body">
+						{{ total_order_commission }}
+					</div>
+					<div class="pts-box-bottom">
+						<a  href="{{ my_commission }}">{{ text_view_more }}</a>
+					</div>
+				</div>
+			</div>
+			
+		</div>
+		
+		<h2 class="pts-dash-heading">
+			<i class="fa fa-shopping-cart " ></i>&nbsp;{{ text_latest_order }}
+			 <span> {{ text_last_five_records }}</span>
+			<div class="pts-right-link pts-pull-right">
+			    <a href="{{ my_orders }}">{{ text_view_more }}</a>
+			</div>
+		</h2>		
+		<div class="pts-table-responsive">
+		<table class="pts-table pts-table-bordered pts-table-hover pts-dash-table">
+		  <thead>
+			<tr>
+			  <td>{{ text_order_id }}</td>
+			  <td>{{ text_customer }}</td>
+			  <td>{{ text_status }}</td>
+			  <td>{{ text_admin_status }}</td>
+			  <td>{{ text_commission }}</td>
+			  <td>{{ text_total }}</td>
+			  <td>{{ text_date_added }}</td>
+			  <td>{{ text_date_modified }}</td>
+			  <td>{{ text_action }}</td>
+			</tr>
+		  </thead>
+		  <tbody>
+			{% if seller_orders %}
+			{% for order in seller_orders %}
+			<tr>
+			  <td>{{ order.order_id }}</td>
+			  <td>{{ order.customer }}</td>
+			  <td>{{ order.order_status }}</td>
+			  <td>{{ order.admin_order_status }}</td>
+              <td>{{ order.commission }}</td>
+			  <td>{{ order.total }}</td>
+			  <td>{{ order.date_added }}</td>
+			  <td>{{ order.date_modified }}</td>
+			  <td><a href="{{ order.view }}" data-toggle="tooltip" title="{{ button_view }}" class="pts-btn pts-btn-info"><i class="fa fa-eye"></i></a></td>
+			</tr>
+			{% endfor %}
+			{% else %}
+			<tr>
+			  <td class="pts-text-center" colspan="8">{{ text_no_results }}</td>
+			</tr>
+			{% endif %}
+		  </tbody>
+		</table>
+	</div>
+
+	<h2 class="pts-dash-heading">
+	  <i class="fa fa-money"></i> &nbsp; {{ text_latest_commission }}
+	  <span>{{ text_last_five_records }}</span>
+	  <div class="pts-right-link pts-pull-right">
+	    <a  href="{{ my_commission }}">{{ text_view_more }}</a> 
+	  </div>
+	</h2>
+		
+	  <div class="pts-table-responsive">
+		<table class="pts-table pts-table-bordered pts-table-hover pts-dash-table">
+		  <thead>
+			<tr>
+			  <td>{{ text_order_id }}</td>
+			  <td>{{ text_product_name }}</td>
+			  <td>{{ text_product_price }}</td>
+			  <td>{{ text_commission }}</td>
+			  <td>{{ text_created_date }}</td>
+			</tr>
+		  </thead>
+		  <tbody>
+			{% if seller_commissions %}
+			{% for seller_commission in seller_commissions %}
+			<tr>
+			  <td>{{ seller_commission.order_id }}</td>
+			  <td>{{ seller_commission.product_name }}</td> 
+			  <td>{{ seller_commission.price }}</td>
+			  <td>{{ seller_commission.commission }}</td>
+			  <td>{{ seller_commission.created_at }}</td>
+			</tr>
+			{% endfor %}
+			{% else %}
+			<tr>
+			  <td class="pts-text-center" colspan="8">{{ text_no_results }}</td>
+			  </tr>
+			{% endif %}
+		  </tbody>
+		</table>
+	  </div>
+	
+      {{ content_bottom }}</div>
+    {{ column_right }}</div>
+</div>
+{{ footer }}

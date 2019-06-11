@@ -1,0 +1,506 @@
+{{ header }}
+<div class="pts-container">
+  <ul class="pts-breadcrumb">
+	{% for breadcrumb in breadcrumbs %}
+    <li><a href="{{ breadcrumb.href }}">{{ breadcrumb.text }}</a></li>
+	{% endfor %}
+  </ul>
+  <div class="pts-row">{{ column_left }}
+	{% if column_left and column_right %}
+    {% set class = 'pts-col-sm-6' %}
+    {% elseif column_left or column_right %}
+    {% set class = 'pts-col-sm-9' %}
+    {% else %}
+    {% set class = 'pts-col-sm-12' %}
+    {% endif %}
+    <div id="pts-content" class="{{ class }}">{{ content_top }}
+		<div class="pull-right"><a href="{{ invoice }}" target="_blank" data-toggle="tooltip" title="{{ button_invoice_print }}" class="pts-btn pts-btn-info"><i class="fa fa-print"></i></a></div>
+      <h2>{{ heading_title }}</h2>
+      <div class="pts-row">
+      <div class="pts-col-md-6">
+        <div class="pts-panel pts-panel-default">
+          <div class="pts-panel-heading">
+            <h3 class="pts-panel-title"><i class="fa fa-shopping-cart"></i> {{ text_order_detail }}</h3>
+          </div>
+          <table class="pts-table">
+            <tbody>
+              <tr>
+                <td style="width: 1%;"><button data-toggle="tooltip" title="{{ text_store }}" class="pts-btn pts-btn-info pts-btn-xs"><i class="fa fa-shopping-cart fa-fw"></i></button></td>
+                <td><a href="{{ store_url }}" target="_blank">{{ store_name }}</a></td>
+              </tr>
+              <tr>
+                <td><button data-toggle="tooltip" title="{{ text_date_added }}" class="pts-btn pts-btn-info pts-btn-xs"><i class="fa fa-calendar fa-fw"></i></button></td>
+                <td>{{ date_added }}</td>
+              </tr>
+              <tr>
+                <td><button data-toggle="tooltip" title="{{ text_payment_method }}" class="pts-btn pts-btn-info pts-btn-xs"><i class="fa fa-credit-card fa-fw"></i></button></td>
+                <td>{{ payment_method }}</td>
+              </tr>
+
+            </tbody>
+          </table>
+        </div>
+      </div>
+      <div class="pts-col-md-6">
+        <div class="pts-panel pts-panel-default">
+          <div class="pts-panel-heading">
+            <h3 class="pts-panel-title"><i class="fa fa-user"></i> {{ text_customer_detail }}</h3>
+          </div>
+          <table class="pts-table">
+            <tr>
+              <td style="width: 1%;"><button data-toggle="tooltip" title="{{ text_customer }}" class="pts-btn pts-btn-info pts-btn-xs"><i class="fa fa-user fa-fw"></i></button></td>
+              <td>{% if customer %}
+                {{ firstname }} {{ lastname }}
+				{% else %}
+                {{ firstname }} {{ lastname }}
+				{% endif %}</td>
+            </tr>
+            <tr>
+              <td><button data-toggle="tooltip" title="{{ text_customer_group }}" class="pts-btn pts-btn-info pts-btn-xs"><i class="fa fa-group fa-fw"></i></button></td>
+              <td>{{ customer_group }}</td>
+            </tr>
+            <tr>
+              <td><button data-toggle="tooltip" title="{{ text_email }}" class="pts-btn pts-btn-info pts-btn-xs"><i class="fa fa-envelope-o fa-fw"></i></button></td>
+              <td><a href="mailto:{{ email }}">{{ email }}</a></td>
+            </tr>
+            <tr>
+              <td><button data-toggle="tooltip" title="{{ text_telephone }}" class="pts-btn pts-btn-info pts-btn-xs"><i class="fa fa-phone fa-fw"></i></button></td>
+              <td>{{ telephone }}</td>
+            </tr>
+          </table>
+        </div>
+      </div>
+      
+    </div>
+    <div class="pts-panel pts-panel-default">
+      <div class="pts-panel-heading">
+        <h3 class="pts-panel-title"><i class="fa fa-info-circle"></i> {{ text_order }}</h3>
+      </div>
+      <div class="pts-panel-body">
+        <table class="pts-table pts-table-bordered">
+          <thead>
+            <tr>
+              <td style="width: 50%;" class="pts-text-left">{{ text_payment_address }}</td>
+              {% if shipping_method %}
+              <td style="width: 50%;" class="pts-text-left">{{ text_shipping_address }}</td>
+				{% endif %}
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td class="pts-text-left">{{ payment_address }}</td>
+              {% if shipping_method %}
+              <td class="pts-text-left">{{ shipping_address }}</td>
+			{% endif %}
+            </tr>
+          </tbody>
+        </table>
+        <table class="pts-table pts-table-bordered">
+          <thead>
+            <tr>
+              <td class="pts-text-left">{{ column_product }}</td>
+              <td class="pts-text-left">{{ column_model }}</td>
+              <td class="pts-text-right">{{ column_quantity }}</td>
+              <td class="pts-text-right">{{ column_price }}</td>
+              <td class="pts-text-right">{{ column_total }}</td>
+            </tr>
+          </thead>
+          <tbody>
+			{% for product in products %}
+            <tr>
+              <td class="pts-text-left"><a href="{{ product['href'] }}" target="_blank">{{ product.name }}</a>
+				  {% for option in product.option %}
+                <br />
+                {% if option.type != 'file' %}
+                &nbsp;<small> - {{ option.name }}: {{ option.value }}</small>
+				{% else %}
+                &nbsp;<small> - {{ option.name }}: <a href="{{ option.href }}">{{ option.value }}</a></small>
+				{% endif %}
+				{% endfor %}</td>
+              <td class="pts-text-left">{{ product.model }}</td>
+              <td class="pts-text-right">{{ product.quantity }}</td>
+              <td class="pts-text-right">{{ product.price }}</td>
+              <td class="pts-text-right">{{ product.total }}</td>
+            </tr>
+            {% endfor %}
+			{% for voucher in vouchers %}
+            <tr>
+              <td class="pts-text-left"><a href="{{ voucher.href }}">{{ voucher.description }}</a></td>
+              <td class="pts-text-left"></td>
+              <td class="pts-text-right">1</td>
+              <td class="pts-text-right">{{ voucher.amount }}</td>
+              <td class="pts-text-right">{{ voucher.amount }}</td>
+            </tr>
+            {% endfor %}
+			{% for total in totals %}
+            <tr>
+              <td colspan="4" class="pts-text-right">{{ total.title }}</td>
+              <td class="pts-text-right">{{ total.text }}</td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+        {% if comment %}
+        <table class="pts-table pts-table-bordered">
+          <thead>
+            <tr>
+              <td>{{ text_comment }}</td>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>{{ comment }}</td>
+            </tr>
+          </tbody>
+        </table>
+        {% endif %}
+      </div>
+    </div>
+    <div class="pts-panel pts-panel-default">
+      <div class="pts-panel-heading">
+        <h3 class="pts-panel-title"><i class="fa fa-comment-o"></i> {{ text_history }}</h3>
+      </div>
+      <div class="pts-panel-body">
+        <ul class="pts-nav pts-nav-tabs">
+          <li class="active"><a href="#tab-history" data-toggle="tab">{{ tab_history }}</a></li>
+			{% for tab in tabs %}
+          <li><a href="#tab-{{ tab.code }}" data-toggle="tab">{{ tab.title }}</a></li>
+			{% endfor %}
+        </ul>
+        <div class="tab-pts-content">
+          <div class="pts-tab-pane active" id="tab-history">
+            <div id="history"></div>
+            <br />
+			{% if manage_order %}
+            <fieldset>
+              <legend>{{ text_history_add }}</legend>
+              <form class="pts-form-horizontal">
+                <div class="pts-form-group">
+                  <label class="pts-col-sm-2 pts-control-label" for="input-order-status">{{ entry_order_status }}</label>
+                  <div class="pts-col-sm-10">
+                    <select {% if module_purpletree_multivendor_commission_status == admin_order_status_id %} disabled {% else %} name="order_status_id" {% endif %}id="input-order-status" class="pts-form-control">
+						{% for order_statuses in order_statuses %}
+						{% if order_statuses.order_status_id == order_status_id %}
+                      <option value="{{ order_statuses.order_status_id }}" selected="selected">{{ order_statuses.name }}</option>
+                      {% else %}
+                      <option value="{{ order_statuses.order_status_id }}">{{ order_statuses.name }}</option>
+                      {% endif %}
+                      {% endfor %}
+                    </select>
+                  </div>
+                </div>
+                <div class="pts-form-group">
+                  <label class="pts-col-sm-2 pts-control-label" for="input-override"><span data-toggle="tooltip" title="{{ help_override }}">{{ entry_override }}</span></label>
+                  <div class="pts-col-sm-10">
+                    <input type="checkbox" {% if module_purpletree_multivendor_commission_status == admin_order_status_id %} disabled {% else %} name="override" value="1" {% endif %} id="input-override" />
+                  </div>
+                </div>
+                <div class="pts-form-group">
+                  <label class="pts-col-sm-2 pts-control-label" for="input-notify">{{ entry_notify }}</label>
+                  <div class="pts-col-sm-10">
+                    <input type="checkbox" {% if module_purpletree_multivendor_commission_status == admin_order_status_id %} disabled {% else %} name="notify" value="1" {% endif %}  id="input-notify" />
+                  </div>
+                </div>
+                <div class="pts-form-group">
+                  <label class="pts-col-sm-2 pts-control-label" for="input-comment">{{ entry_comment }}</label>
+                  <div class="pts-col-sm-10">
+                    <textarea {% if module_purpletree_multivendor_commission_status == admin_order_status_id %} disabled {% else %} name="comment" {% endif %} rows="8" id="input-comment" class="pts-form-control"></textarea>
+                  </div>
+                </div>
+              </form>
+            </fieldset>
+            <div class="pts-text-right">
+              <button {% if module_purpletree_multivendor_commission_status == admin_order_status_id %} disabled {% endif %}id="pts-button-history" data-loading-text="{{ text_loading }}" class="pts-btn pts-btn-primary"><i class="fa fa-plus-circle"></i> {{ button_history_add }}</button>
+            </div>
+			{% endif %}
+          </div>
+          <div class="pts-tab-pane" id="pts-tab-additional">
+            {% if account_custom_fields %}
+            <div class="pts-table-responsive">
+              <table class="pts-table pts-table-bordered">
+                <thead>
+                  <tr>
+                    <td colspan="2">{{ text_account_custom_field }}</td>
+                  </tr>
+                </thead>
+                <tbody>
+					{% for custom_field in account_custom_fields %}
+                  <tr>
+                    <td>{{ custom_field.name }}</td>
+                    <td>{{ custom_field.value }}</td>
+                  </tr>
+                  {% endfor %}
+                </tbody>
+              </table>
+            </div>
+           {% endif %}
+			{% if payment_custom_fields %}
+            <div class="pts-table-responsive">
+              <table class="pts-table pts-table-bordered">
+                <thead>
+                  <tr>
+                    <td colspan="2">{{ text_payment_custom_field }}</td>
+                  </tr>
+                </thead>
+                <tbody>
+					{% for custom_field in payment_custom_fields %}
+                  <tr>
+                    <td>{{ custom_field.name }}</td>
+                    <td>{{ custom_field.value }}</td>
+                  </tr>
+                  {% endfor %}
+                </tbody>
+              </table>
+            </div>
+            {% endif %}
+				{% if shipping_method and shipping_custom_fields %}
+            <div class="pts-table-responsive">
+              <table class="pts-table pts-table-bordered">
+                <thead>
+                  <tr>
+                    <td colspan="2">{{ text_shipping_custom_field }}</td>
+                  </tr>
+                </thead>
+                <tbody>
+					{% for custom_field in shipping_custom_fields %}
+                  <tr>
+                    <td>{{ custom_field.name }}</td>
+                    <td>{{ custom_field.value }}</td>
+                  </tr>
+                  {% endfor %}
+                </tbody>
+              </table>
+            </div>
+            {% endif %}
+            </div>
+          </div>
+          {% for tab in tabs %}
+          <div class="pts-tab-pane" id="tab-{{ tab.code }}">{{ tab.content }}</div>
+         {% endfor %}
+        </div>
+      </div>
+	  {{ content_bottom }}
+    </div>
+    {{ column_right }}</div>
+</div>
+<script type="text/javascript"><!--
+$(document).delegate('#pts-button-invoice', 'click', function() {
+	$.ajax({
+		url: 'index.php?route=sale/order/createinvoiceno&order_id={{ order_id }}',
+		dataType: 'json',
+		beforeSend: function() {
+			$('#button-invoice').button('loading');
+		},
+		complete: function() {
+			$('#button-invoice').button('reset');
+		},
+		success: function(json) {
+			$('.alert').remove();
+
+			if (json['error']) {
+				$('#pts-content > .pts-container-fluid').prepend('<div class="alert alert-danger"><i class="fa fa-exclamation-circle"></i> ' + json['error'] + '</div>');
+			}
+
+			if (json['invoice_no']) {
+				$('#invoice').html(json['invoice_no']);
+
+				$('#button-invoice').replaceWith('<button disabled="disabled" class="pts-btn pts-btn-success pts-btn-xs"><i class="fa fa-cog"></i></button>');
+			}
+		},
+		error: function(xhr, ajaxOptions, thrownError) {
+			alert(thrownError + "\r\n" + xhr.statusText + "\r\n" + xhr.responseText);
+		}
+	});
+});
+
+$(document).delegate('#button-reward-add', 'click', function() {
+	$.ajax({
+		url: 'index.php?route=sale/order/addreward&order_id={{ order_id }}',
+		type: 'post',
+		dataType: 'json',
+		beforeSend: function() {
+			$('#button-reward-add').button('loading');
+		},
+		complete: function() {
+			$('#button-reward-add').button('reset');
+		},
+		success: function(json) {
+			$('.alert').remove();
+
+			if (json['error']) {
+				$('#pts-content > .pts-container-fluid').prepend('<div class="alert alert-danger"><i class="fa fa-exclamation-circle"></i> ' + json['error'] + '</div>');
+			}
+
+			if (json['success']) {
+                $('#pts-content > .pts-container-fluid').prepend('<div class="alert pts-alert-success"><i class="fa fa-check-circle"></i> ' + json['success'] + '</div>');
+
+				$('#button-reward-add').replaceWith('<button id="button-reward-remove" data-toggle="tooltip" title="{{ button_reward_remove }}" class="pts-btn pts-btn-danger pts-btn-xs"><i class="fa fa-minus-circle"></i></button>');
+			}
+		},
+		error: function(xhr, ajaxOptions, thrownError) {
+			alert(thrownError + "\r\n" + xhr.statusText + "\r\n" + xhr.responseText);
+		}
+	});
+});
+
+$(document).delegate('#button-reward-remove', 'click', function() {
+	$.ajax({
+		url: 'index.php?route=sale/order/removereward&order_id={{ order_id }}',
+		type: 'post',
+		dataType: 'json',
+		beforeSend: function() {
+			$('#button-reward-remove').button('loading');
+		},
+		complete: function() {
+			$('#button-reward-remove').button('reset');
+		},
+		success: function(json) {
+			$('.alert').remove();
+
+			if (json['error']) {
+				$('#pts-content > .pts-container-fluid').prepend('<div class="alert alert-danger"><i class="fa fa-exclamation-circle"></i> ' + json['error'] + '</div>');
+			}
+
+			if (json['success']) {
+                $('#pts-content > .pts-container-fluid').prepend('<div class="alert pts-alert-success"><i class="fa fa-check-circle"></i> ' + json['success'] + '</div>');
+
+				$('#button-reward-remove').replaceWith('<button id="button-reward-add" data-toggle="tooltip" title="{{ button_reward_add }}" class="pts-btn pts-btn-success pts-btn-xs"><i class="fa fa-plus-circle"></i></button>');
+			}
+		},
+		error: function(xhr, ajaxOptions, thrownError) {
+			alert(thrownError + "\r\n" + xhr.statusText + "\r\n" + xhr.responseText);
+		}
+	});
+});
+
+$(document).delegate('#button-commission-add', 'click', function() {
+	$.ajax({
+		url: 'index.php?route=sale/order/addcommission&order_id={{ order_id }}',
+		type: 'post',
+		dataType: 'json',
+		beforeSend: function() {
+			$('#button-commission-add').button('loading');
+		},
+		complete: function() {
+			$('#button-commission-add').button('reset');
+		},
+		success: function(json) {
+			$('.alert').remove();
+
+			if (json['error']) {
+				$('#pts-content > .pts-container-fluid').prepend('<div class="alert alert-danger"><i class="fa fa-exclamation-circle"></i> ' + json['error'] + '</div>');
+			}
+
+			if (json['success']) {
+                $('#pts-content > .pts-container-fluid').prepend('<div class="alert pts-alert-success"><i class="fa fa-check-circle"></i> ' + json['success'] + '</div>');
+
+				$('#button-commission-add').replaceWith('<button id="button-commission-remove" data-toggle="tooltip" title="{{ button_commission_remove }}" class="pts-btn pts-btn-danger pts-btn-xs"><i class="fa fa-minus-circle"></i></button>');
+			}
+		},
+		error: function(xhr, ajaxOptions, thrownError) {
+			alert(thrownError + "\r\n" + xhr.statusText + "\r\n" + xhr.responseText);
+		}
+	});
+});
+
+$(document).delegate('#button-commission-remove', 'click', function() {
+	$.ajax({
+		url: 'index.php?route=sale/order/removecommission&order_id={{ order_id }}',
+		type: 'post',
+		dataType: 'json',
+		beforeSend: function() {
+			$('#button-commission-remove').button('loading');
+		},
+		complete: function() {
+			$('#button-commission-remove').button('reset');
+		},
+		success: function(json) {
+			$('.alert').remove();
+
+			if (json['error']) {
+				$('#pts-content > .pts-container-fluid').prepend('<div class="alert alert-danger"><i class="fa fa-exclamation-circle"></i> ' + json['error'] + '</div>');
+			}
+
+			if (json['success']) {
+                $('#pts-content > .pts-container-fluid').prepend('<div class="alert pts-alert-success"><i class="fa fa-check-circle"></i> ' + json['success'] + '</div>');
+
+				$('#button-commission-remove').replaceWith('<button id="button-commission-add" data-toggle="tooltip" title="{{ button_commission_add }}" class="pts-btn pts-btn-success pts-btn-xs"><i class="fa fa-plus-circle"></i></button>');
+			}
+		},
+		error: function(xhr, ajaxOptions, thrownError) {
+			alert(thrownError + "\r\n" + xhr.statusText + "\r\n" + xhr.responseText);
+		}
+	});
+});
+
+
+$('#history').delegate('.pagination a', 'click', function(e) {
+	e.preventDefault();
+
+	$('#history').load(this.href);
+});
+
+$('#history').load('index.php?route=extension/account/purpletree_multivendor/sellerorder/historylist&order_id={{ order_id }}');
+{% if module_purpletree_multivendor_commission_status != admin_order_status_id %}
+$('#pts-button-history').on('click', function() {
+	/*
+	if (typeof verifyStatusChange == 'function'){
+		if (verifyStatusChange() == false){
+			return false;
+		} else{
+			addOrderInfo();
+		}
+	} else{
+		addOrderInfo();
+	}*/
+
+	$.ajax({
+		url: 'index.php?route=extension/account/purpletree_multivendor/sellerorder/history&order_id={{ order_id }}',
+		type: 'post',
+		dataType: 'json',
+		data: 'order_status_id=' + encodeURIComponent($('select[name=\'order_status_id\']').val()) + '&notify=' + ($('input[name=\'notify\']').prop('checked') ? 1 : 0) + '&override=' + ($('input[name=\'override\']').prop('checked') ? 1 : 0) + '&append=' + ($('input[name=\'append\']').prop('checked') ? 1 : 0) + '&comment=' + encodeURIComponent($('textarea[name=\'comment\']').val()),
+		beforeSend: function() {
+			$('#button-history').button('loading');
+		},
+		complete: function() {
+			$('#button-history').button('reset');
+		},
+		success: function(json) {
+			$('.alert').remove();
+
+			if (json['error']) {
+				$('#history').before('<div class="alert alert-danger"><i class="fa fa-exclamation-circle"></i> ' + json['error'] + ' <button type="button" class="close" data-dismiss="alert">&times;</button></div>');
+			}
+
+			if (json['success']) {
+				$('#history').load('index.php?route=extension/account/purpletree_multivendor/sellerorder/historylist&order_id={{ order_id }}');
+
+				$('#history').before('<div class="alert pts-alert-success"><i class="fa fa-check-circle"></i> ' + json['success'] + ' <button type="button" class="close" data-dismiss="alert">&times;</button></div>');
+
+				$('textarea[name=\'comment\']').val('');
+			}
+		},
+		error: function(xhr, ajaxOptions, thrownError) {
+			alert(thrownError + "\r\n" + xhr.statusText + "\r\n" + xhr.responseText);
+		}
+	});
+});
+{% endif %}
+
+function addOrderInfo(){
+	var status_id = $('select[name="order_status_id"]').val();
+
+	$.ajax({
+		url: 'index.php?route=extension/openbay/addorderinfo&order_id={{ order_id }}&status_id=' + status_id,
+		type: 'post',
+		dataType: 'html',
+		data: $(".openbay-data").serialize()
+	});
+}
+
+
+/* $('select[name="order_status_id"]').change(function(){
+	changeStatus();
+}); */
+//--></script> 
+{{ footer }}

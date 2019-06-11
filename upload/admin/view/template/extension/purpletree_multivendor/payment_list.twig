@@ -1,0 +1,131 @@
+{{ header }}
+{{ column_left }}
+<div id="content">
+  <div class="page-header">
+    <div class="container-fluid">
+      <h1>{{ heading_title }}</h1>
+      <ul class="breadcrumb">
+	  {% for breadcrumb in breadcrumbs %}
+        <li><a href="{{ breadcrumb.href }}">{{ breadcrumb.text }}</a></li>
+		{% endfor %}
+      </ul>
+    </div>
+  </div>
+  <div class="container-fluid">
+  {% if error_warning %}
+    <div class="alert alert-danger"><i class="fa fa-exclamation-circle"></i> {{ error_warning }}
+      <button type="button" class="close" data-dismiss="alert">&times;</button>
+    </div>
+    {% endif %}
+	{% if success %}
+    <div class="alert alert-success"><i class="fa fa-check-circle"></i> {{ success }}
+      <button type="button" class="close" data-dismiss="alert">&times;</button>
+    </div>
+    {% endif %}
+    <div class="panel panel-default">
+      <div class="panel-heading">
+        <h3 class="panel-title"><i class="fa fa-list"></i> {{ text_list }}</h3>
+      </div>
+      <div class="panel-body">
+        <div class="well">
+          <div class="row">
+            <div class="col-sm-4">
+              <div class="form-group">
+                <label class="control-label" for="input-date-added">{{ entry_date_from }}</label>
+				<input type="hidden" name="seller_id" value="{{ seller_id }}">
+                <div class="input-group date">
+                  <input type="text" name="filter_date_from" value="{{ filter_date_from }}" placeholder="{{ entry_date_from }}" data-date-format="YYYY-MM-DD" id="input-date-from" class="form-control" />
+                  <span class="input-group-btn">
+                  <button type="button" class="btn btn-default"><i class="fa fa-calendar"></i></button>
+                  </span></div>
+              </div>
+            </div>
+			<div class="col-sm-4">
+              <div class="form-group">
+                <label class="control-label" for="input-date-modified">{{ entry_date_to }}</label>
+                <div class="input-group date">
+                  <input type="text" name="filter_date_to" value="{{ filter_date_to }}" placeholder="{{ entry_date_to }}" data-date-format="YYYY-MM-DD" id="input-date-to" class="form-control" />
+                  <span class="input-group-btn">
+                  <button type="button" class="btn btn-default"><i class="fa fa-calendar"></i></button>
+                  </span></div>
+              </div>        
+            </div>
+            <div class="col-sm-2">
+				<label class="control-label"></label>
+				<div class="form-group">
+					<button type="button" id="button-filter" class="btn btn-primary pull-right"><i class="fa fa-filter"></i> {{ button_filter }}</button>
+				</div>
+            </div>
+          </div>
+        </div>
+        <form method="post" action="" enctype="multipart/form-data" id="form-order">
+          <div class="table-responsive">
+            <table class="table table-bordered table-hover">
+              <thead>
+                <tr>
+                  <td class="text-left">{{ text_trnasaction }}</td>
+				  <td class="text-left">{{ text_amount }}</td>
+				  <td class="text-left">{{ text_payment_mode }}</td>
+				  <td class="text-left">{{ text_status }}</td>
+				  <td class="text-left">{{ text_created_at }}</td>
+                </tr>
+              </thead>
+              <tbody>
+			  {% if seller_payments %}
+				  {% for seller_payment in seller_payments %}
+				<tr>
+				  <td class="text-left">#{{ seller_payment.transaction_id }}</td>
+				  <td class="text-left">{{ seller_payment.amount }}</td>
+				  <td class="text-left">{{ seller_payment.payment_mode }}</td>
+				  <td class="text-left">{{ seller_payment.status }}</td>
+				  <td class="text-left">{{ seller_payment.created_at }}</td>
+				</tr>
+				{% endfor %}
+				{% else %}
+                <tr>
+                  <td class="text-center" colspan="8">{{ text_no_results }}</td>
+                </tr>
+                {% endif %}
+              </tbody>
+            </table>
+          </div>
+        </form>
+        <div class="row">
+          <div class="col-sm-6 text-left">{{ pagination }}</div>
+          <div class="col-sm-6 text-right">{{ results }}</div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <script type="text/javascript"><!--
+$('#button-filter').on('click', function() {
+	url = 'index.php?route=extension/purpletree_multivendor/sellerpayment&user_token={{ user_token }}';
+	
+	var seller_id = $('input[name=\'seller_id\']').val();
+
+	if (seller_id) {
+		url += '&seller_id=' + encodeURIComponent(seller_id);
+	}	
+	var filter_date_from = $('input[name=\'filter_date_from\']').val();
+
+	if (filter_date_from) {
+		url += '&filter_date_from=' + encodeURIComponent(filter_date_from);
+	}
+
+	var filter_date_to = $('input[name=\'filter_date_to\']').val();
+
+	if (filter_date_to) {
+		url += '&filter_date_to=' + encodeURIComponent(filter_date_to);
+	}
+
+	location = url;
+});
+//--></script> 
+  <script src="view/javascript/jquery/datetimepicker/bootstrap-datetimepicker.min.js" type="text/javascript"></script>
+  <link href="view/javascript/jquery/datetimepicker/bootstrap-datetimepicker.min.css" type="text/css" rel="stylesheet" media="screen" />
+  <script type="text/javascript"><!--
+$('.date').datetimepicker({
+	pickTime: false
+});
+//--></script></div>
+{{ footer }}

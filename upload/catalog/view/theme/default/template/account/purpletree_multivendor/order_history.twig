@@ -1,0 +1,32 @@
+<div class="pts-table-responsive">
+  <table class="pts-table pts-table-bordered">
+    <thead>
+      <tr>
+        <td class="pts-text-left">{{ column_date_added }}</td>
+        <td class="pts-text-left">{{ column_comment }}</td>
+        <td class="pts-text-left">{{ column_status }}</td>
+        <td class="pts-text-left">{{ column_notify }}</td>
+      </tr>
+    </thead>
+    <tbody>
+		{% if histories %}
+		{% for history in histories %}
+      <tr>
+        <td class="pts-text-left">{{ history.date_added }}</td>
+        <td class="pts-text-left">{{ history.comment }}</td>
+        <td class="pts-text-left">{{ history.status }}</td>
+        <td class="pts-text-left">{{ history.notify }}</td>
+      </tr>
+		{% endfor %}
+		{% else %}
+      <tr>
+        <td class="pts-text-center" colspan="4">{{ text_no_results }}</td>
+      </tr>
+      {% endif %}
+    </tbody>
+  </table>
+</div>
+<div class="pts-row">
+  <div class="pts-col-sm-6 pts-text-left">{{ pagination }}</div>
+  <div class="pts-col-sm-6 pts-text-right">{{ results }}</div>
+</div>

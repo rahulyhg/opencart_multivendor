@@ -1,0 +1,2719 @@
+<modification>
+	<name>Purpletree Multivendor for OpenCart 3.x</name>
+	<code>Purpletree Multivendor for OpenCart 3.x</code>
+	<version>3.x</version>
+	<author>Purpletree</author>
+			<file path="admin/controller/common/column_left.php">
+		<operation error="skip">
+			<search><![CDATA[$report = array();]]></search>
+			<add position="before"><![CDATA[
+			/*********   Purpletree Multivendor Left Menu   ************/
+			if ($this->config->get('module_purpletree_multivendor_status')) {
+						$purpletree_multivendor = array();
+			if ($this->user->hasPermission('access', 'extension/module/purpletree_multivendor')) {
+				$purpletree_multivendor[] = array(
+					'name'	   => $this->language->get('text_pt_setting'),
+					'href'     => $this->url->link('extension/module/purpletree_multivendor', 'user_token=' . $this->session->data['user_token'], true),
+					'children' => array()		
+				);	
+			}
+			if ($this->user->hasPermission('access', 'extension/purpletree_multivendor/vendor')) {
+				$purpletree_multivendor[] = array(
+					'name'	   => $this->language->get('text_pt_vendors'),
+					'href'     => $this->url->link('extension/purpletree_multivendor/vendor', 'user_token=' . $this->session->data['user_token'], true),
+					'children' => array()		
+				);	
+			}
+			if ($this->user->hasPermission('access', 'extension/purpletree_multivendor/stores')) {
+				$purpletree_multivendor[] = array(
+					'name'	   => $this->language->get('text_pt_stores'),
+					'href'     => $this->url->link('extension/purpletree_multivendor/stores', 'user_token=' . $this->session->data['user_token'], true),
+					'children' => array()		
+				);	
+			}
+			
+			if ($this->user->hasPermission('access', 'extension/purpletree_multivendor/sellerproducts')) {
+				$purpletree_multivendor[] = array(
+					'name'	   => $this->language->get('text_pt_sellerproducts'),
+					'href'     => $this->url->link('extension/purpletree_multivendor/sellerproducts', 'user_token=' . $this->session->data['user_token'], true),
+					'children' => array()		
+				);	
+			}
+			$orderstatus = 0;
+			if(null !== $this->config->get('module_purpletree_multivendor_commission_status')) {
+				$orderstatus = $this->config->get('module_purpletree_multivendor_commission_status');
+			}
+			if ($this->user->hasPermission('access', 'extension/purpletree_multivendor/sellerorders')) {
+				$purpletree_multivendor[] = array(
+					'name'	   => $this->language->get('text_pt_sellerorders'),
+					'href'     => $this->url->link('extension/purpletree_multivendor/sellerorders', 'filter_order_status='.$orderstatus.'&filter_admin_order_status='.$orderstatus.'&user_token=' . $this->session->data['user_token'], true),
+					'children' => array()		
+				);	
+			}
+		
+			if ($this->user->hasPermission('access', 'extension/purpletree_multivendor/sellerreviews')) {
+				$purpletree_multivendor[] = array(
+					'name'	   => $this->language->get('text_pt_sellerreviews'),
+					'href'     => $this->url->link('extension/purpletree_multivendor/sellerreviews', 'user_token=' . $this->session->data['user_token'], true),
+					'children' => array()		
+				);	
+			}
+			if ($this->user->hasPermission('access', 'extension/purpletree_multivendor/sellercontacts')) {
+				$purpletree_multivendor[] = array(
+					'name'	   => $this->language->get('text_pt_sellercontacts'),
+					'href'     => $this->url->link('extension/purpletree_multivendor/sellercontacts', 'user_token=' . $this->session->data['user_token'], true),
+					'children' => array()		
+				);	
+			}
+			
+						if ($this->user->hasPermission('access', 'extension/purpletree_multivendor/categoriescommission')) {
+				$purpletree_multivendor[] = array(
+					'name'	   => $this->language->get('text_pt_categoriescommission'),
+					'href'     => $this->url->link('extension/purpletree_multivendor/categoriescommission', 'user_token=' . $this->session->data['user_token'], true),
+					'children' => array()		
+				);	
+			}
+				
+			if ($this->user->hasPermission('access', 'extension/purpletree_multivendor/upgradedatabase')) {				$purpletree_multivendor[] = array(
+				'name'  => $this->language->get('text_pt_upgradedatabase'),
+				'href'  => $this->url->link('extension/purpletree_multivendor/upgradedatabase', 'user_token=' . $this->session->data['user_token'], true),
+					'children' => array()		
+				);	
+			}
+			
+			if ($purpletree_multivendor) {
+				$data['menus'][] = array(
+					'id'       => 'menu-purpletree-multivendor',
+					'icon'	   => 'fa-user', 
+					'name'	   => $this->language->get('text_pt_multivendor'),
+					'href'     => '',
+					'children' => $purpletree_multivendor
+				);	
+			}
+			}
+			]]></add>
+		</operation>
+		<operation error="skip">
+				<search><![CDATA[$this->load->language('common/column_left');]]></search>
+				<add position="before"><![CDATA[
+					$this->load->language('customer/ptscustomer');
+					
+				]]></add>
+			</operation>
+	</file>
+	<file path="admin/controller/extension/extension/module.php">
+		<operation error="skip">
+			<search><![CDATA[$this->model_setting_extension->install('module', $this->request->get['extension']);]]></search>
+			<add position="after"><![CDATA[
+			/***********    Create Tables For Multivendor Extension when module installs     ***********/
+			if($this->request->get['extension']=="purpletree_multivendor"){
+			$query = $this->db->query("SHOW TABLES LIKE '" . DB_PREFIX . "purpletree_vendor_stores'");	
+				if($query->num_rows==0) 
+		{
+			$seller_layout = $this->db->query("SELECT layout_id FROM " . DB_PREFIX . "layout WHERE name='Account'");
+			
+			if($seller_layout->num_rows > 0){
+				$data = $seller_layout->row;
+					$this->db->query("INSERT into " . DB_PREFIX . "layout_route SET layout_id='".$data['layout_id']."', store_id='0', route='extension/account/%'");	
+			}
+		$this->db->query("CREATE TABLE IF NOT EXISTS `" . DB_PREFIX . "purpletree_vendor_stores` (
+  							`id` int(11) NOT NULL AUTO_INCREMENT,
+  							`seller_id` int(11) NOT NULL,
+  							`store_name` varchar(256) NOT NULL,
+  							`store_logo` varchar(150) NOT NULL,
+  							`store_email` varchar(200) NOT NULL,
+  							`store_phone` varchar(14) NOT NULL,
+  							`store_banner` varchar(150) NOT NULL,
+  							`document` varchar(150) NOT NULL,
+  							`store_description` text NOT NULL,
+  							`store_address` text NOT NULL,
+  							`store_city` varchar(200) NOT NULL,
+  							`store_country` int(11) NOT NULL,
+  							`store_state` int(11) NOT NULL,
+  							`store_zipcode` varchar(11) NOT NULL,
+  							`store_shipping_policy` text NOT NULL,
+							`store_return_policy` text NOT NULL,
+							`store_meta_keywords` text NOT NULL,
+							`store_meta_descriptions` text NOT NULL,
+							`store_bank_details` varchar(356) NOT NULL,
+  							`store_tin` varchar(50) NOT NULL,
+							`store_status` tinyint(1) NOT NULL,
+  							`store_commission` float(6,4) NULL DEFAULT NULL,
+  							`is_removed` tinyint(1) NOT NULL,
+  							`store_created_at` date NOT NULL,
+  							`store_updated_at` date NOT NULL,
+  							PRIMARY KEY (`id`)  ) CHARACTER SET utf8 COLLATE utf8_unicode_ci
+						");
+				
+				$this->db->query("CREATE TABLE IF NOT EXISTS `" . DB_PREFIX . "purpletree_vendor_products` (
+  							`id` int(11) NOT NULL AUTO_INCREMENT,
+  							`seller_id` int(11) NOT NULL,
+  							`product_id` int(11) NOT NULL,
+  							`is_approved` tinyint(1) NOT NULL,
+  							`created_at` date NOT NULL,
+  							`updated_at` date NOT NULL,
+  							PRIMARY KEY (`id`)) CHARACTER SET utf8 COLLATE utf8_unicode_ci
+						");
+				$this->db->query("CREATE TABLE IF NOT EXISTS `" . DB_PREFIX . "purpletree_vendor_orders` (
+  							`id` int(11) NOT NULL AUTO_INCREMENT,
+  							`seller_id` int(11) NOT NULL,
+  							`product_id` int(11) NOT NULL,
+  							`order_id` int(11) NOT NULL,
+  							`quantity` int(11) NOT NULL,
+  							`unit_price` decimal(10,2) NOT NULL,
+							`shipping` decimal(6,2) NOT NULL,
+  							`total_price` decimal(10,2) NOT NULL,
+  							`order_status_id` int(3) NOT NULL,
+  							`created_at` date NOT NULL,
+  							`updated_at` date NOT NULL,
+  							PRIMARY KEY (`id`)) CHARACTER SET utf8 COLLATE utf8_unicode_ci
+						");
+				$this->db->query("CREATE TABLE IF NOT EXISTS `" . DB_PREFIX . "purpletree_order_total` (
+  							`order_total_id` int(11) NOT NULL AUTO_INCREMENT,
+  							`order_id` int(11) NOT NULL,
+  							`seller_id` int(11) NOT NULL,
+  							`code` varchar(32) NOT NULL,
+  							`title` varchar(255) NOT NULL,
+  							`value` decimal(15,4) NOT NULL,
+  							`sort_order` int(3) NOT NULL,
+  							PRIMARY KEY (`order_total_id`)) CHARACTER SET utf8 COLLATE utf8_unicode_ci
+						");
+				$this->db->query("CREATE TABLE IF NOT EXISTS `" . DB_PREFIX . "purpletree_vendor_orders_history` (
+  							`id` int(11) NOT NULL AUTO_INCREMENT,
+  							`seller_id` int(11) NOT NULL,
+  							`order_id` int(11) NOT NULL,
+  							`order_status_id` int(11) NOT NULL,
+  							`comment` varchar(250) NOT NULL,
+							`notify` tinyint(1) NOT NULL,
+  							`created_at` date NOT NULL,
+  							PRIMARY KEY (`id`)) CHARACTER SET utf8 COLLATE utf8_unicode_ci
+						");
+				$this->db->query("CREATE TABLE IF NOT EXISTS `" . DB_PREFIX . "purpletree_vendor_reviews` (
+  							`id` int(11) NOT NULL AUTO_INCREMENT,
+  							`seller_id` int(11) NOT NULL,
+  							`customer_id` int(11) NOT NULL,
+  							`review_title` varchar(150) NOT NULL,
+  							`review_description` text NOT NULL,
+  							`rating` int(11) NOT NULL,
+  							`status` tinyint(1) NOT NULL,
+  							`created_at` date NOT NULL,
+  							`updated_at` date NOT NULL,
+  							PRIMARY KEY (`id`)) CHARACTER SET utf8 COLLATE utf8_unicode_ci
+						");
+				$this->db->query("CREATE TABLE IF NOT EXISTS `" . DB_PREFIX . "purpletree_vendor_commissions` (
+  							`id` int(11) NOT NULL AUTO_INCREMENT,
+  							`seller_id` int(11) NOT NULL,
+  							`order_id` int(11) NOT NULL,
+  							`product_id` int(11) NOT NULL,
+							`commission_fixed` int(50) NOT NULL DEFAULT '0',
+							`commission_percent` decimal(4,2) NOT NULL DEFAULT '0.00',
+							`invoice_status` int(50) NOT NULL DEFAULT '0',
+  							`commission` decimal(10,2) NOT NULL,
+  							`status` varchar(50) NOT NULL,
+  							`created_at` date NOT NULL,
+  							`updated_at` date NOT NULL,
+  							PRIMARY KEY (`id`)) CHARACTER SET utf8 COLLATE utf8_unicode_ci
+						");
+				       $this->db->query("CREATE TABLE IF NOT EXISTS `" . DB_PREFIX . "purpletree_vendor_contact` (
+							  `id` int(10) NOT NULL AUTO_INCREMENT,
+							  `seller_id` int(10) NOT NULL,
+							  `customer_id` int(10) NOT NULL,
+							  `contact_from` int(10) NOT NULL,
+							  `customer_name` varchar(150) NOT NULL,
+							  `customer_email` varchar(150) NOT NULL,
+							  `customer_message` text NOT NULL,
+							  `created_at` datetime NOT NULL,
+							  `updated_at` datetime NOT NULL,
+							  PRIMARY KEY (`id`)) CHARACTER SET utf8 COLLATE utf8_unicode_ci
+					");
+					$this->db->query("CREATE TABLE IF NOT EXISTS `" . DB_PREFIX . "purpletree_vendor_categories_commission` (
+  							`id` int(11) NOT NULL AUTO_INCREMENT,
+  							`category_id` int(11) NOT NULL,
+  							`commission` decimal(4,2) NOT NULL,
+							`commison_fixed` double NOT NULL,
+  							`seller_group` int(50) NOT NULL DEFAULT '1',
+  							PRIMARY KEY (`id`)) CHARACTER SET utf8 COLLATE utf8_unicode_ci
+							");
+			$this->db->query("CREATE TABLE IF NOT EXISTS `" . DB_PREFIX . "purpletree_vendor_commission_invoice_items` (
+  							`id` int(11) NOT NULL AUTO_INCREMENT,
+							`link_id` int(50) NOT NULL,
+  							`order_id` int(50) NOT NULL,
+  							`product_id` int(50) NOT NULL,
+  							`seller_id` int(50) NOT NULL,
+  							`commission_fixed` int(50) NOT NULL DEFAULT '0',
+  							`commission_percent` decimal(4,2) NOT NULL DEFAULT '0.00',
+  							`total_commission` float(8,2) NOT NULL,
+  							PRIMARY KEY (`id`)) CHARACTER SET utf8 COLLATE utf8_unicode_ci
+						");
+						$this->db->query("CREATE TABLE IF NOT EXISTS `" . DB_PREFIX . "purpletree_vendor_commission_invoice` (
+  							`id` int(11) NOT NULL AUTO_INCREMENT,
+							`total_amount` decimal(11,2) NOT NULL DEFAULT '0.00',
+							`total_commission` decimal(11,2) NOT NULL DEFAULT '0.00',
+							`total_pay_amount` decimal(11,2) NOT NULL DEFAULT '0.00',
+  							`created_at` date NOT NULL,
+  							PRIMARY KEY (`id`)) CHARACTER SET utf8 COLLATE utf8_unicode_ci
+						");
+				// End seller blog	
+	
+			}
+		}
+			
+			]]></add>
+		</operation>
+		<operation error="skip">
+			<search><![CDATA[$this->model_setting_extension->uninstall('module', $this->request->get['extension']);]]></search>
+			<add position="after"><![CDATA[
+			/*******  Drop Tables Of Multivendor Extension when module un-installs  *******/
+			if($this->request->get['extension']=="purpletree_multivendor"){
+				$query = $this->db->query("SHOW TABLES LIKE '" . DB_PREFIX . "purpletree_vendor_stores'");	
+				if($query->num_rows==1) 
+				{
+					$this->db->query("DROP TABLE ". DB_PREFIX ."purpletree_vendor_stores");
+					$this->db->query("DROP TABLE ". DB_PREFIX ."purpletree_vendor_products");
+					$this->db->query("DROP TABLE ". DB_PREFIX ."purpletree_vendor_orders");
+					$this->db->query("DROP TABLE ". DB_PREFIX ."purpletree_vendor_reviews");
+					$this->db->query("DROP TABLE ". DB_PREFIX ."purpletree_vendor_commissions");
+					$this->db->query("DROP TABLE ". DB_PREFIX ."purpletree_order_total");
+					$this->db->query("DROP TABLE ". DB_PREFIX ."purpletree_vendor_orders_history");
+					$this->db->query("DROP TABLE ". DB_PREFIX ."purpletree_vendor_contact");
+					
+					//subscription plan_description
+
+					$this->db->query("DELETE FROM " . DB_PREFIX . "seo_url WHERE query LIKE '%seller_store_id%'");
+					$this->db->query("DROP TABLE ". DB_PREFIX ."purpletree_vendor_categories_commission");
+              				
+				//End seller blog
+					$this->db->query("DROP TABLE ". DB_PREFIX ."purpletree_vendor_commission_invoice_items");
+					$this->db->query("DROP TABLE ". DB_PREFIX ."purpletree_vendor_commission_invoice");
+				}
+			}
+			]]></add>
+		</operation>
+	</file>
+	<file path="system/library/cart/user.php">
+		<operation error="log" info="create new fields metal and price_extra in table product if not exists">
+			<search><![CDATA[$user_query = $this->db->query("SELECT * FROM " . DB_PREFIX . "user WHERE user_id = '" . (int)$this->session->data['user_id'] . "' AND status = '1'");]]></search>
+			<add position="after"><![CDATA[
+			$field_query = $this->db->query("SHOW COLUMNS FROM `" . DB_PREFIX . "product` LIKE 'metal'");
+			if (!$field_query->num_rows) {
+			$this->db->query("ALTER TABLE `" . DB_PREFIX . "product`  ADD `metal` INT(1) NOT NULL DEFAULT '0' AFTER `product_id`");
+			}
+			
+			$field_query = $this->db->query("SHOW COLUMNS FROM `" . DB_PREFIX . "product` LIKE 'price_extra'");
+			if (!$field_query->num_rows) {
+			$this->db->query("ALTER TABLE `" . DB_PREFIX . "product`  ADD `price_extra` DECIMAL(15,4) NOT NULL DEFAULT '0.00' AFTER `price`");
+			}
+			
+			$field_query = $this->db->query("SHOW COLUMNS FROM `" . DB_PREFIX . "product` LIKE 'price_extra_type'");
+			if (!$field_query->num_rows) {
+			$this->db->query("ALTER TABLE `" . DB_PREFIX . "product`  ADD `price_extra_type` INT(1) NOT NULL DEFAULT '0' AFTER `price`");
+			}
+			]]></add>
+		</operation>
+	</file>
+	<file path="catalog/controller/common/footer.php">
+		<operation error="skip">
+			<search><![CDATA[public function index() {]]></search>
+			<add position="after"><![CDATA[
+					$data['seller_chat'] = '';
+			if(NULL !== $this->config->get('module_purpletree_multivendor_status')){
+			if($this->config->get('module_purpletree_multivendor_status')){
+		
+			}
+			}
+			]]></add>
+		</operation>
+	</file>
+	<file path="catalog/controller/extension/module/account.php">
+		<operation error="skip">
+			<search><![CDATA[public function index() {]]></search>
+			<add position="after"><![CDATA[$data['sellercontact'] = $this->url->link('extension/account/purpletree_multivendor/sellercontact/customerContactlist', '', true);]]></add>
+		</operation>
+	</file>
+	<file path="admin/controller/startup/permission.php">
+		<operation error="skip">
+			<search><![CDATA['extension/openbay']]></search>
+			<add position="after"><![CDATA[,'extension/purpletree_multivendor']]></add>
+		</operation>
+	</file>	
+	<file path="admin/controller/catalog/product.php">
+		<operation error="skip">
+		<search><![CDATA[$this->load->language('catalog/product');]]></search>
+				<add position="after"><![CDATA[
+					$this->load->language('customer/ptscustomer');
+				]]></add>
+			</operation>
+			<operation error="skip">
+			<search><![CDATA[$data['cancel'] = $this->url->link('catalog/product', 'user_token=' . $this->session->data['user_token'] . $url, true);]]></search>
+			<add position="after"><![CDATA[
+				/*** Load multivendor vendor model ***/
+				$this->load->model('extension/purpletree_multivendor/vendor');
+			]]></add>
+		</operation>
+		<operation error="skip">
+			<search><![CDATA[$product_info = $this->model_catalog_product->getProduct($this->request->get['product_id']);]]></search>
+			<add position="after"><![CDATA[
+				/*** Get seller associated with this product ***/
+				$product_seller = $this->model_extension_purpletree_multivendor_vendor->getProductSeller($this->request->get['product_id']);
+			]]></add>
+		</operation>
+		<operation error="skip">
+			<search><![CDATA[$data['tab_openbay']]]></search>
+			<add position="before"><![CDATA[
+				$data['tab_vendor'] = $this->language->get('tab_vendor');
+		
+			$data['error_vendor'] = $this->language->get('error_vendor');
+			]]></add>
+		</operation>
+		<operation error="skip">
+			<search><![CDATA[$this->load->model('catalog/recurring');]]></search>
+			<add position="before"><![CDATA[
+			/** get vendor name for this product if any **/
+				if (isset($this->request->post['vendor'])) {
+					$data['vendor'] = $this->request->post['vendor'];
+				} elseif (!empty($product_seller)) {
+					$data['vendor'] = (int)$product_seller['seller_id'];
+				} else {
+					$data['vendor'] = '';
+				}
+				/** get all vendors **/
+				$data['vendors'] = $this->model_extension_purpletree_multivendor_vendor->getVendors();
+			]]></add>
+		</operation>
+	</file>
+
+	<file path="admin/view/template/catalog/product_form.twig">
+		<operation error="skip">
+			<search><![CDATA[<li><a href="#tab-design" data-toggle="tab">{{ tab_design }}</a></li>]]></search>
+			<add position="after"><![CDATA[
+			<!-- Vendor Tab-->
+				<li><a href="#tab-vendor" data-toggle="tab">{{ tab_vendor }}</a></li>
+			]]></add>
+		</operation>
+		<operation error="skip">
+			<search><![CDATA[</form>]]></search>
+			<add position="before" offset="1"><![CDATA[
+			<!-- Vendor Tab-->
+				<div class="tab-pane" id="tab-vendor">
+				<div class="form-group">
+				<label class="col-sm-2 control-label" for="input-vendor">{{ tab_vendor }}</label>
+				<div class="col-sm-10">
+				<select name="vendor" id="input-vendor" class="form-control">
+					<option value="0">{{ text_none }}</option>
+					{% for vendr in vendors %}
+					{% if vendor == vendr.seller_id %}
+					<option value="{{ vendr.seller_id }}" selected="selected">{{ vendr.name }}</option>
+					{% else %}
+					<option value="{{ vendr.seller_id }}">{{ vendr.name }}</option>
+					{% endif %}
+					{% endfor %}
+				  </select>
+				</div>
+              </div>
+            </div>
+			]]></add>
+		</operation>
+	</file>
+	<file path="admin/model/catalog/product.php">
+		<operation error="skip">
+			<search><![CDATA[if (isset($data['product_attribute'])) {]]></search>
+			<add position="before"><![CDATA[
+			/** update product status according to mv config setting **/
+				if (isset($data['vendor']) && !empty($data['vendor'])) {
+					if($this->config->get('module_purpletree_multivendor_product_approval')){
+						$is_approved = 0;
+						$this->db->query("UPDATE " . DB_PREFIX . "product SET status = '0' WHERE product_id = '" . (int)$product_id . "'");
+					} else{
+						$is_approved = 1;
+					}
+					$this->db->query("INSERT INTO " . DB_PREFIX . "purpletree_vendor_products SET product_id = '" . (int)$product_id . "', seller_id = '" . (int)$data['vendor'] . "', created_at =NOW(), updated_at =NOW(), is_approved = '".(int)$is_approved."'");
+				}
+			]]></add>
+		</operation>
+		<operation error="skip">
+			<search><![CDATA[if (!empty($data['product_attribute'])) {]]></search>
+			<add position="before"><![CDATA[
+			/** update or insert into seller products **/
+				if (isset($data['vendor']) && !empty($data['vendor'])) {
+					$query = $this->db->query("SELECT seller_id FROM " . DB_PREFIX . "purpletree_vendor_products WHERE product_id='".(int)$product_id."'");
+					if($query->num_rows > 0) {
+						$this->db->query("UPDATE " . DB_PREFIX . "purpletree_vendor_products SET seller_id = '" . (int)$data['vendor'] . "', updated_at =NOW() WHERE product_id = '".(int)$product_id."'");
+					} else {
+						if($this->config->get('purpletree_multivendor_product_approval')){
+							$is_approved = 0;
+							$this->db->query("UPDATE " . DB_PREFIX . "product SET status = '0' WHERE product_id = '" . (int)$product_id . "'");
+						} else{
+							$is_approved = 1;
+						}
+						$this->db->query("INSERT INTO " . DB_PREFIX . "purpletree_vendor_products SET product_id = '" . (int)$product_id . "', seller_id = '" . (int)$data['vendor'] . "', created_at =NOW(), updated_at =NOW(), is_approved = '".(int)$is_approved."'");
+					}
+				} else {
+					$query = $this->db->query("DELETE FROM " . DB_PREFIX . "purpletree_vendor_products WHERE product_id='".(int)$product_id."'");
+				}
+			]]></add>
+		</operation>
+	</file>
+	<file path="catalog/controller/account/account.php">
+		<operation error="skip">
+			<search><![CDATA[if (isset($this->session->data['success'])) {]]></search>
+			<add position="before"><![CDATA[
+				if (isset($this->session->data['error_warning'])) {
+					$data['error_warning'] = $this->session->data['error_warning'];
+
+					unset($this->session->data['error_warning']);
+				}
+			]]></add>
+		</operation>
+	</file>
+		<file path="catalog/view/theme/*/template/account/account.twig">
+		<operation error="skip">
+			<search><![CDATA[ {% if success %}]]></search>
+			<add position="before"><![CDATA[
+			{% if error_warning %}
+			 <div class="alert alert-danger"><i class="fa fa-exclamation-circle"></i> {{ error_warning }}</div>
+			 {% endif %}
+			]]></add>
+		</operation>
+	</file>
+		<file path="catalog/controller/extension/module/account.php">
+		<operation error="skip">
+			<search><![CDATA[$data['recurring'] = $this->url->link('account/recurring', '', true);]]></search>
+			<add position="after"><![CDATA[
+				$this->load->language('account/ptsregister');
+				$data['sellercontact'] = $this->url->link('extension/account/purpletree_multivendor/sellercontact/customerContactlist', '', true);
+				$data['sellercontact_module'] =$this->config->get('module_purpletree_multivendor_seller_contact');	
+		$data['purpletree_module_status'] =$this->config->get('module_purpletree_multivendor_status');	
+			]]></add>
+		</operation>
+	</file>
+	<file path="catalog/view/theme/*/template/extension/module/account.twig">
+		<operation error="skip">
+			<search><![CDATA[ <a href="{{ newsletter }}" class="list-group-item">{{ text_newsletter }}</a>]]></search>
+			<add position="before"><![CDATA[
+			{% if sellercontact_module==1 and purpletree_module_status==1 %}
+			<a href="{{ sellercontact }}" class="list-group-item">{{  text_seller_contact1 }}</a>
+				{% endif %}
+			]]></add>
+		</operation>
+	</file>
+	<file path="catalog/view/theme/journal2/template/extension/module/account.twig">
+		<operation error="skip">
+			<search><![CDATA[ <a href="{{ newsletter }}" class="list-group-item">{{ text_newsletter }}</a>]]></search>
+			<add position="before"><![CDATA[
+			{% if sellercontact_module==1 and purpletree_module_status==1 %}
+			<li style="list-style:none"><a href="{{ sellercontact }}" class="list-group-item">{{  text_seller_contact1 }}</a></li>
+				{% endif %}
+			]]></add>
+		</operation>
+	</file>
+	
+	<file path="admin/controller/customer/customer.php">
+		<operation error="skip">
+			<search><![CDATA[$data['user_token'] = $this->session->data['user_token'];]]></search>
+			<add position="after"><![CDATA[
+				$data['text_confirm_seller'] = $this->language->get('text_confirm_seller');
+				$data['module_purpletree_multivendor_status'] = $this->config->get('module_purpletree_multivendor_status');
+			$data['module_purpletree_multivendor_become_seller'] = $this->config->get('module_purpletree_multivendor_become_seller');
+				$data['text_seller'] = $this->language->get('text_seller');
+				$data['text_store_name'] = $this->language->get('text_store_name');
+			]]></add>
+		</operation>
+		
+		<operation error="skip">
+		<search><![CDATA[$this->load->language('customer/customer');]]></search>
+				<add position="after"><![CDATA[
+				$this->load->language('customer/ptscustomer');
+				]]></add>
+			</operation>
+			<operation error="skip">
+			<search><![CDATA[$this->model_customer_customer->addCustomer($this->request->post);]]></search>
+			<add position="replace"><![CDATA[
+			/** add seller **/
+			$customer_id = $this->model_customer_customer->addCustomer($this->request->post);
+				if($this->request->post['become_seller']=="1"){
+					$store_name = trim($this->request->post['seller_storename']);
+					$this->load->model('extension/purpletree_multivendor/vendor');
+					$file ='';
+					$this->model_extension_purpletree_multivendor_vendor->addSeller($customer_id,$store_name,$file);
+					
+				}
+			]]></add>
+		</operation>
+		<operation error="skip">
+			<search><![CDATA[$this->model_customer_customer->editCustomer($this->request->get['customer_id'], $this->request->post);]]></search>
+			<add position="after"><![CDATA[		
+			/** edit seller **/
+					$customer_id = $this->request->get['customer_id'];
+					$store_name = trim($this->request->post['seller_storename']);
+					$this->load->model('extension/purpletree_multivendor/vendor');
+							$file ='';
+							$this->model_extension_purpletree_multivendor_vendor->editSeller($customer_id,$store_name, $this->request->post['become_seller'],$file);
+				
+			]]></add>
+		</operation>
+		<operation error="skip">
+			<search><![CDATA[$customer_info = $this->model_customer_customer->getCustomer($this->request->get['customer_id']);]]></search>
+			<add position="after"><![CDATA[
+			/** get seller store information **/
+			$this->load->model('extension/purpletree_multivendor/stores');
+			$seller_info = $this->model_extension_purpletree_multivendor_stores->getStoreDetail($this->request->get['customer_id']);
+			]]></add>
+		</operation>
+		<operation error="skip">
+			<search><![CDATA[protected function validateForm() {]]></search>
+			<add position="after"><![CDATA[
+			$c_id = '';
+			if(isset($this->request->get['customer_id'])) {
+				$c_id = $this->request->get['customer_id'];
+			}
+			$this->load->model('extension/purpletree_multivendor/vendor');
+			if($this->request->post['become_seller']){
+			
+			$this->load->language('customer/ptscustomer');
+			if ((utf8_strlen($this->request->post['seller_storename']) < 5) || (utf8_strlen(trim($this->request->post['seller_storename'])) > 50)) {
+			$this->error['seller_store'] = $this->language->get('error_storename');
+		} 		
+				     $this->load->model('extension/purpletree_multivendor/stores');				
+            $store_info1 = $this->model_extension_purpletree_multivendor_stores->getStoreNameByStoreName($this->request->post['seller_storename']);
+		 
+		if(isset($this->request->get['customer_id'])) {
+			if ($store_info1 && ($this->request->get['customer_id'] != $store_info1['seller_id'] && strtoupper(trim($this->request->post['seller_storename']))==strtoupper($store_info1['store_name']))) {
+				$this->error['seller_store'] = $this->language->get('error_exist_storename');
+				$this->error['warning'] = $this->language->get('error_warning');
+		}
+		} 	else {
+        if ($store_info1 && (strtoupper(trim($this->request->post['seller_storename']))==strtoupper($store_info1['store_name']))) {
+				$this->error['seller_store'] = $this->language->get('error_exist_storename');
+				$this->error['warning'] = $this->language->get('error_warning');
+		}
+		}		
+			
+			
+		}
+			]]></add>
+		</operation>
+		<operation error="skip">
+			<search><![CDATA[if (isset($this->request->post['customer_group_id'])) {]]></search>
+			<add position="before"><![CDATA[
+			/***  get become seller status and seller store name **/
+			if (isset($this->request->post['become_seller'])) {
+			$data['become_seller'] = $this->request->post['become_seller'];
+		} elseif (!empty($seller_info)) {
+			$data['become_seller'] = $seller_info['store_status'];
+		} else {
+			$data['become_seller'] = '';
+		}
+		
+		$data['become_seller_base'] = '';
+		if (!empty($seller_info)) {
+			$data['become_seller_base'] = $seller_info['store_status'];
+		}
+		
+		if (isset($this->request->post['seller_storename'])) {
+			$data['seller_storename'] = $this->request->post['seller_storename'];
+		} elseif (!empty($seller_info)) {
+			$data['seller_storename'] = $seller_info['store_name'];
+		} else {
+			$data['seller_storename'] = '';
+		}
+		]]></add>
+		</operation>
+		<operation error="skip">
+			<search><![CDATA[if (isset($this->error['address'])) {]]></search>
+			<add position="before"><![CDATA[if (isset($this->error['seller_store'])) {
+				$data['error_sellerstore'] = $this->error['seller_store'];
+			} else {
+				$data['error_sellerstore'] = '';
+			}
+			if (isset($this->error['warning1'])) {
+			$data['error_warning1'] = $this->error['warning1'];
+			} else {
+				$data['error_warning1'] = '';
+			}
+			]]></add>
+		</operation>
+	</file>
+	<file path="admin/view/template/customer/customer_form.twig">
+		<operation error="skip">
+			<search><![CDATA[<label class="col-sm-2 control-label" for="input-safe">{{ entry_safe }}</label>]]></search>
+			<add position="replace" index="1" offset="12"><![CDATA[
+			<label class="col-sm-2 control-label" for="input-safe">{{ entry_safe }}</label>
+                          <div class="col-sm-10">
+                            <select name="safe" id="input-safe" class="form-control">
+                              {% if safe %}
+                              <option value="1" selected="selected">{{ text_yes }}</option>
+                              <option value="0">{{ text_no }}</option>
+                              {% else %}
+                              <option value="1">{{ text_yes }}</option>
+                              <option value="0" selected="selected">{{ text_no }}</option>
+                              {% endif %}
+                            </select>
+                          </div>
+				</div>
+				{% if module_purpletree_multivendor_status %}
+				<div class="form-group">
+				<label class="col-sm-2 control-label">{{ text_seller }}</label>
+				<div class="col-sm-10">
+				<label class="radio-inline">
+                <input type="radio" name="become_seller" value="0" checked="checked" id="add_document"/>
+                {{ text_no }}</label>
+				<label class="radio-inline">
+                <input type="radio" name="become_seller" value="1" {{ ((become_seller=="1")?'checked="checked"':'') }} id="remove_document"/>
+                {{ text_yes }}</label>
+				</div> 
+			</div>
+			<div class="form-group">
+				<label class="col-sm-2 control-label">{{ text_store_name }}</label>
+				<div class="col-sm-10">
+                <input type="text" name="seller_storename" value="{{ seller_storename }}" class="form-control"  />
+				 {% if error_sellerstore %}
+              <div class="text-danger">{{ error_sellerstore }}</div>
+              {% endif %}
+            </div>
+            </div>
+			{% endif %}
+			]]></add>
+		</operation>
+		<operation error="skip">
+			<search><![CDATA[<button type="submit" form="form-customer" data-toggle="tooltip" title="{{ button_save }}" class="btn btn-primary"><i class="fa fa-save"></i></button>]]></search>
+			<add position="replace" index="0" offset="0"><![CDATA[<button type="button" onclick="checkdata()" data-toggle="tooltip" title="{{ button_save }}" class="btn btn-primary"><i class="fa fa-save"></i></button>		
+			]]></add>
+		</operation>
+		<operation error="skip">
+			<search><![CDATA[{% if error_warning %}]]></search>
+			<add position="before"><![CDATA[
+				{% if error_warning1 %}
+				<div class="alert alert-danger"><i class="fa fa-exclamation-circle"></i> {{ error_warning1 }}
+				  <button type="button" class="close" data-dismiss="alert">&times;</button>
+				</div>
+				{% endif %}
+			]]></add>
+		</operation>
+		
+		<operation error="skip">
+				<search><![CDATA[{{ footer }]]></search>
+				<add position="before"><![CDATA[
+				 <script>
+				  function checkdata(){			
+						 
+				       {% if become_seller_base != '' %}
+						if($('#add_document').is(':checked')) {  
+								confirm('{{ text_confirm_seller }}') ? $('#form-customer').submit() : false;
+						} else {
+							$('#form-customer').submit();
+						}
+				  {% else %}
+					$('#form-customer').submit();
+				  {% endif %}
+  
+                  }
+				 </script>
+				]]></add>					
+			</operation>				
+	</file>
+	
+		<file path="catalog/model/extension/d_quickcheckout/order.php">   
+		 <operation error="skip">
+			<search><![CDATA[public function addOrder($data) {]]></search>
+			<add position="after"><![CDATA[
+			$total = 0;	
+			$seller_sub_total = array();
+			$seller_final_total = array();
+			$seller_tax_data = array();
+			$seller_total_tax = array();
+			$tax_data = array();
+			$seller = array();
+			
+			]]></add>
+		</operation>
+		
+		<operation error="skip">
+			<search><![CDATA[public function updateOrder($order_id, $data) {]]></search>
+			<add position="after"><![CDATA[
+			$total = 0;	
+			$seller_sub_total = array();
+			$seller_final_total = array();
+			$seller_tax_data = array();
+			$seller_total_tax = array();
+			$tax_data = array();
+			$seller = array();
+			
+			]]></add>
+		</operation>
+		
+		 <operation error="skip">
+			<search><![CDATA[$this->db->query("DELETE FROM " . DB_PREFIX . "order_option WHERE order_id = '" . (int) $order_id . "'");]]></search>
+			<add position="after"><![CDATA[
+			$this->db->query("DELETE FROM " . DB_PREFIX . "purpletree_vendor_orders WHERE order_id = '" . (int)$order_id . "'");
+			$this->db->query("DELETE FROM " . DB_PREFIX . "purpletree_vendor_commissions WHERE order_id = '" . (int)$order_id . "'");
+			]]></add>
+		 </operation>
+		 
+		 <operation error="skip">
+			<search><![CDATA[$this->db->query("DELETE FROM " . DB_PREFIX . "order_voucher WHERE order_id = '" . (int) $order_id . "'");]]></search>
+			<add position="after"><![CDATA[
+			$this->db->query("DELETE FROM " . DB_PREFIX . "purpletree_order_total WHERE order_id = '" . (int)$order_id . "'");
+			]]></add>
+		</operation>
+		 
+		 <operation error="skip">
+			<search><![CDATA[public function addOrder($data) {]]></search>
+			<add position="before"><![CDATA[
+			public function getProductCategory($productid){
+		
+		$sql = "SELECT category_id FROM " . DB_PREFIX . "product_to_category where 	product_id = '".(int)$productid."'"; 
+		
+		  $query = $this->db->query($sql);
+		  
+		  return $query->rows;  
+		}
+			public function getVendorOrderProducts($order_id) {
+		$query = $this->db->query("SELECT * FROM " . DB_PREFIX . "purpletree_vendor_orders WHERE order_id = '" . (int)$order_id . "'");
+		
+		return $query->rows;
+	}
+
+	public function getoptionsweight($product){
+		$productsql = "SELECT weight,weight_class_id FROM ".DB_PREFIX."product WHERE product_id =".$product['product_id']."";
+				$productquery = $this->db->query($productsql)->row;
+				$totweight = $productquery['weight'];
+			if(!empty($product['option'])) {
+				foreach($product['option'] as $productsoptin) {
+					//echo "c";
+					$productsql1 = "SELECT pov.weight,pov.weight_prefix,p.weight_class_id FROM ".DB_PREFIX."product p JOIN ". DB_PREFIX ."product_option_value pov ON(pov.product_id = p.product_id) WHERE pov.product_option_value_id = '".$productsoptin['product_option_value_id']."' AND pov.product_option_id = '".$productsoptin['product_option_id']."' AND pov.product_id = '".$product['product_id']."' AND pov.option_id = '".$productsoptin['option_id']."' AND pov.option_value_id = '".$productsoptin['option_value_id']."'";
+					$productquery1 = $this->db->query($productsql1)->row;
+					if(!empty($productquery1)){
+						if ($productquery1['weight_prefix'] == '+') {
+							$totweight += $totweight+($productquery1['weight'] * $product['quantity']);	
+						} elseif ($product_option_value_info['weight_prefix'] == '-') {
+							$totweight -= $totweight-($productquery1['weight'] * $product['quantity']);
+						}
+					}
+				}
+			} else {
+					$totweight = $totweight * $product['quantity'];
+			}
+		$totalweight = $this->weight->convert($totweight, $productquery['weight_class_id'], $this->config->get('config_weight_class_id'));
+		return $totalweight;
+	}			
+
+	]]></add>
+		</operation>
+
+		 <operation error="skip">
+			<search><![CDATA[$order_product_id = $this->db->getLastId();]]></search>
+			<add position="after"><![CDATA[
+		 /*** insert into seller orders ****/
+			if ($this->config->get('module_purpletree_multivendor_status')) {	
+					
+					$seller_id = $this->db->query("SELECT pvp.seller_id, pvs.store_commission, p.tax_class_id FROM " . DB_PREFIX . "purpletree_vendor_products pvp JOIN " . DB_PREFIX . "purpletree_vendor_stores pvs ON(pvs.seller_id=pvp.seller_id) JOIN " . DB_PREFIX . "product p ON(p.product_id=pvp.product_id) WHERE pvp.product_id='".(int)$product['product_id']."' AND pvp.is_approved=1")->row;
+					if(!empty($seller_id['seller_id'])) {
+						
+						$this->db->query("INSERT INTO " . DB_PREFIX . "purpletree_vendor_orders SET order_id ='".(int)$order_id."', seller_id = '".(int)$seller_id['seller_id']."', product_id ='".(int)$product['product_id']."', quantity = '" . (int)$product['quantity'] . "', unit_price = '" . (float)$product['price'] . "', total_price = '" . (float)$product['total'] . "', created_at =NOW(), updated_at = NOW()");
+						
+						
+						$this->db->query("INSERT INTO " . DB_PREFIX . "purpletree_vendor_commissions SET order_id = '" . (int)$order_id . "', product_id ='".(int)$product['product_id']."', seller_id = '" . (int)$seller_id['seller_id'] . "', commission_fixed = '0', commission_percent = '0', commission = '0', status = 'Pending', created_at = NOW(), updated_at = NOW()");
+						
+						if(!isset($seller_sub_total[$seller_id['seller_id']])){
+						$seller_sub_total[$seller_id['seller_id']] = $product['total'];
+						} else {
+							$seller_sub_total[$seller_id['seller_id']] += $product['total'];
+						}
+						
+						if(!isset($seller_final_total[$seller_id['seller_id']])){
+							$seller_final_total[$seller_id['seller_id']] = $this->tax->calculate($product['price'], $seller_id['tax_class_id'], $this->config->get('config_tax')) * $product['quantity'];
+						} else {
+							$seller_final_total[$seller_id['seller_id']] += $this->tax->calculate($product['price'], $seller_id['tax_class_id'], $this->config->get('config_tax')) * $product['quantity'];
+						}
+						
+						$tax_rates = $this->tax->getRates($product['price'], $seller_id['tax_class_id']);
+			
+						foreach ($tax_rates as $tax_rate) {
+							if (!isset($seller_tax_data[$seller_id['seller_id']][$tax_rate['tax_rate_id']])) {
+								$seller_tax_data[$seller_id['seller_id']][$tax_rate['tax_rate_id']] = ($tax_rate['amount'] * $product['quantity']);
+							} else {
+								$seller_tax_data[$seller_id['seller_id']][$tax_rate['tax_rate_id']] += ($tax_rate['amount'] * $product['quantity']);
+							}
+						}
+				
+					} 
+				}
+			]]></add>
+		</operation>
+		
+		<operation error="skip">
+			<search><![CDATA[foreach ($data['vouchers'] as $voucher) {]]></search>
+			<add position="before"><![CDATA[
+
+					$this->load->language('extension/total/total');
+			/**************************************** For seller tax*******************************/
+		if(! empty($seller_tax_data))
+		{
+			foreach($seller_tax_data as $key=>$value){
+				foreach ($value as $key1 => $value1) {
+					if ($value1 > 0) {
+						$tax_detail[$key][] = array(
+							'code'       => 'tax',
+							'title'      => $this->tax->getRateName($key1),
+							'value'      => $value1,
+							'sort_order' => $this->config->get('total_tax_sort_order')
+						);
+						if(!isset($seller_total_tax[$key])){
+							$seller_total_tax[$key] = $value1;
+						} else {
+							$seller_total_tax[$key] +=$value1 ;
+						}
+					}
+				}
+			} 
+			}
+			/**************************************** For seller shipping*******************************/
+			$this->load->language('account/ptsregister');
+
+		
+			/**************************************** For seller total*******************************/
+			
+			foreach($seller_final_total as $key=>$value) {
+				if(!isset($seller_total_tax[$key])){
+					$seller_total_tax[$key]=0;
+				}
+
+			
+
+				if ($value > 0) { 
+					$tax_detail[$key][] = array(
+						'code'       => 'total',
+						'title'      => $this->language->get('text_total'),
+						'value'      => max(0, ($seller_sub_total[$key]+$seller_total_tax[$key])),
+						'sort_order' => $this->config->get('total_total_sort_order')
+					);
+				}
+			}
+				
+			/**************************************** For seller sub-total*******************************/
+			foreach($seller_sub_total as $key=>$value) {
+				if ($value > 0) {
+					$tax_detail[$key][] = array(
+						'code'       => 'sub_total',
+						'title'      => $this->language->get('text_sub_total'),
+						'value'      => $value,
+						'sort_order' => $this->config->get('sub_total_sort_order')
+					);
+				}
+			}
+			//echo "<pre>";
+			//print_r($tax_detail);
+		if (isset($tax_detail)) {
+			foreach ($tax_detail as $key=>$value) {
+				foreach($value as $data_1){
+					$this->db->query("INSERT INTO " . DB_PREFIX . "purpletree_order_total SET order_id = '" . (int)$order_id . "', seller_id = '".(int)$key."', code = '" . $this->db->escape($data_1['code']) . "', title = '" . $this->db->escape($data_1['title']) . "', `value` = '" . (float)$data_1['value'] . "', sort_order = '" . (int)$data_1['sort_order'] . "'");
+				}
+			}
+		}
+			]]></add>
+		</operation>
+</file>
+	
+	<file path="catalog/model/checkout/order.php">
+		<operation error="skip">
+			<search><![CDATA[public function addOrder($data) {]]></search>
+			<add position="after"><![CDATA[
+			$total = 0;	
+			$seller_sub_total = array();
+			$seller_final_total = array();
+			$seller_tax_data = array();
+			$seller_total_tax = array();
+			$tax_data = array();
+			$seller = array();
+			
+			]]></add>
+		</operation>
+		<operation error="skip">
+			<search><![CDATA[public function editOrder($order_id, $data) {]]></search>
+			<add position="after"><![CDATA[
+			$total = 0;	
+			$seller_sub_total = array();
+			$seller_final_total = array();
+			$seller_tax_data = array();
+			$seller_total_tax = array();
+			$tax_data = array();
+			$seller = array();
+		
+			]]></add>
+		</operation>
+		<operation error="skip">
+			<search><![CDATA[$this->db->query("DELETE FROM " . DB_PREFIX . "order_option WHERE order_id = '" . (int)$order_id . "'");]]></search>
+			<add position="after"><![CDATA[
+			$this->db->query("DELETE FROM " . DB_PREFIX . "purpletree_vendor_orders WHERE order_id = '" . (int)$order_id . "'");
+			$this->db->query("DELETE FROM " . DB_PREFIX . "purpletree_vendor_commissions WHERE order_id = '" . (int)$order_id . "'");
+			]]></add>
+		</operation>
+				<operation error="skip">
+			<search><![CDATA[$this->db->query("DELETE FROM " . DB_PREFIX . "order_voucher WHERE order_id = '" . (int)$order_id . "'");]]></search>
+			<add position="after"><![CDATA[
+			$this->db->query("DELETE FROM " . DB_PREFIX . "purpletree_order_total WHERE order_id = '" . (int)$order_id . "'");
+			]]></add>
+		</operation>
+		<operation error="skip">
+			<search><![CDATA[public function addOrder($data) {]]></search>
+			<add position="before"><![CDATA[
+			public function getProductCategory($productid){
+		
+		$sql = "SELECT category_id FROM " . DB_PREFIX . "product_to_category where 	product_id = '".(int)$productid."'"; 
+		
+		  $query = $this->db->query($sql);
+		  
+		  return $query->rows;  
+		}
+			public function getVendorOrderProducts($order_id) {
+		$query = $this->db->query("SELECT * FROM " . DB_PREFIX . "purpletree_vendor_orders WHERE order_id = '" . (int)$order_id . "'");
+		
+		return $query->rows;
+	}
+
+	public function getoptionsweight($product){
+		$productsql = "SELECT weight,weight_class_id FROM ".DB_PREFIX."product WHERE product_id =".$product['product_id']."";
+				$productquery = $this->db->query($productsql)->row;
+				$totweight = $productquery['weight'];
+			if(!empty($product['option'])) {
+				foreach($product['option'] as $productsoptin) {
+					//echo "c";
+					$productsql1 = "SELECT pov.weight,pov.weight_prefix,p.weight_class_id FROM ".DB_PREFIX."product p JOIN ". DB_PREFIX ."product_option_value pov ON(pov.product_id = p.product_id) WHERE pov.product_option_value_id = '".$productsoptin['product_option_value_id']."' AND pov.product_option_id = '".$productsoptin['product_option_id']."' AND pov.product_id = '".$product['product_id']."' AND pov.option_id = '".$productsoptin['option_id']."' AND pov.option_value_id = '".$productsoptin['option_value_id']."'";
+					$productquery1 = $this->db->query($productsql1)->row;
+					if(!empty($productquery1)){
+						if ($productquery1['weight_prefix'] == '+') {
+							$totweight += $totweight+($productquery1['weight'] * $product['quantity']);	
+						} elseif ($product_option_value_info['weight_prefix'] == '-') {
+							$totweight -= $totweight-($productquery1['weight'] * $product['quantity']);
+						}
+					}
+				}
+			} else {
+					$totweight = $totweight * $product['quantity'];
+			}
+		$totalweight = $this->weight->convert($totweight, $productquery['weight_class_id'], $this->config->get('config_weight_class_id'));
+		return $totalweight;
+	}			
+	]]></add>
+		</operation>
+
+		<operation error="skip">
+			<search><![CDATA[$order_product_id = $this->db->getLastId();]]></search>
+			<add position="after"><![CDATA[
+		 /*** insert into seller orders ****/
+			if ($this->config->get('module_purpletree_multivendor_status')) {	
+					
+					$seller_id = $this->db->query("SELECT pvp.seller_id,pvs.store_commission, p.tax_class_id FROM " . DB_PREFIX . "purpletree_vendor_products pvp JOIN " . DB_PREFIX . "purpletree_vendor_stores pvs ON(pvs.seller_id=pvp.seller_id) JOIN " . DB_PREFIX . "product p ON(p.product_id=pvp.product_id) WHERE pvp.product_id='".(int)$product['product_id']."' AND pvp.is_approved=1")->row;
+					if(!empty($seller_id['seller_id'])) {
+						
+						$this->db->query("INSERT INTO " . DB_PREFIX . "purpletree_vendor_orders SET order_id ='".(int)$order_id."', seller_id = '".(int)$seller_id['seller_id']."', product_id ='".(int)$product['product_id']."', quantity = '" . (int)$product['quantity'] . "', unit_price = '" . (float)$product['price'] . "', total_price = '" . (float)$product['total'] . "', created_at =NOW(), updated_at = NOW()");
+						
+						
+						$this->db->query("INSERT INTO " . DB_PREFIX . "purpletree_vendor_commissions SET order_id = '" . (int)$order_id . "', product_id ='".(int)$product['product_id']."', seller_id = '" . (int)$seller_id['seller_id'] . "', commission_fixed = '0', commission_percent = '0', commission = '0', status = 'Pending', created_at = NOW(), updated_at = NOW()");
+						
+						if(!isset($seller_sub_total[$seller_id['seller_id']])){
+						$seller_sub_total[$seller_id['seller_id']] = $product['total'];
+						} else {
+							$seller_sub_total[$seller_id['seller_id']] += $product['total'];
+						}
+						
+						if(!isset($seller_final_total[$seller_id['seller_id']])){
+							$seller_final_total[$seller_id['seller_id']] = $this->tax->calculate($product['price'], $seller_id['tax_class_id'], $this->config->get('config_tax')) * $product['quantity'];
+						} else {
+							$seller_final_total[$seller_id['seller_id']] += $this->tax->calculate($product['price'], $seller_id['tax_class_id'], $this->config->get('config_tax')) * $product['quantity'];
+						}
+						
+						$tax_rates = $this->tax->getRates($product['price'], $seller_id['tax_class_id']);
+			
+						foreach ($tax_rates as $tax_rate) {
+							if (!isset($seller_tax_data[$seller_id['seller_id']][$tax_rate['tax_rate_id']])) {
+								$seller_tax_data[$seller_id['seller_id']][$tax_rate['tax_rate_id']] = ($tax_rate['amount'] * $product['quantity']);
+							} else {
+								$seller_tax_data[$seller_id['seller_id']][$tax_rate['tax_rate_id']] += ($tax_rate['amount'] * $product['quantity']);
+							}
+						}
+
+					}
+
+				}
+			]]></add>
+		</operation>
+		<operation error="skip">
+			<search><![CDATA[if (isset($data['vouchers'])) {]]></search>
+			<add position="before"><![CDATA[
+					$this->load->language('extension/total/total');
+			/**************************************** For seller tax*******************************/
+		if(! empty($seller_tax_data))
+		{
+			foreach($seller_tax_data as $key=>$value){
+				foreach ($value as $key1 => $value1) {
+					if ($value1 > 0) {
+						$tax_detail[$key][] = array(
+							'code'       => 'tax',
+							'title'      => $this->tax->getRateName($key1),
+							'value'      => $value1,
+							'sort_order' => $this->config->get('total_tax_sort_order')
+						);
+						if(!isset($seller_total_tax[$key])){
+							$seller_total_tax[$key] = $value1;
+						} else {
+							$seller_total_tax[$key] +=$value1 ;
+						}
+					}
+				}
+			} 
+			}
+			/**************************************** For seller shipping*******************************/
+			$this->load->language('account/ptsregister');
+		
+			/**************************************** For seller total*******************************/
+			
+			foreach($seller_final_total as $key=>$value) {
+				if(!isset($seller_total_tax[$key])){
+					$seller_total_tax[$key]=0;
+				}
+
+				if ($value > 0) { 
+					$tax_detail[$key][] = array(
+						'code'       => 'total',
+						'title'      => $this->language->get('text_total'),
+						'value'      => max(0, ($seller_sub_total[$key]+$seller_total_tax[$key])),
+						'sort_order' => $this->config->get('total_total_sort_order')
+					);
+				}
+			}
+				
+			/**************************************** For seller sub-total*******************************/
+			foreach($seller_sub_total as $key=>$value) {
+				if ($value > 0) {
+					$tax_detail[$key][] = array(
+						'code'       => 'sub_total',
+						'title'      => $this->language->get('text_sub_total'),
+						'value'      => $value,
+						'sort_order' => $this->config->get('sub_total_sort_order')
+					);
+				}
+			}
+			//echo "<pre>";
+			//print_r($tax_detail);
+		if (isset($tax_detail)) {
+			foreach ($tax_detail as $key=>$value) {
+				foreach($value as $data_1){
+					$this->db->query("INSERT INTO " . DB_PREFIX . "purpletree_order_total SET order_id = '" . (int)$order_id . "', seller_id = '".(int)$key."', code = '" . $this->db->escape($data_1['code']) . "', title = '" . $this->db->escape($data_1['title']) . "', `value` = '" . (float)$data_1['value'] . "', sort_order = '" . (int)$data_1['sort_order'] . "'");
+				}
+			}
+		}
+			]]></add>
+		</operation>
+		<operation error="skip">
+			<search><![CDATA[$this->db->query("UPDATE `" . DB_PREFIX . "order` SET order_status_id = '" . (int)$order_status_id . "', date_modified = NOW() WHERE order_id = '" . (int)$order_id . "'");]]></search>
+			<add position="before"><![CDATA[
+			// Update the DB with the new statuses
+			/*** update seller order and add order history ***/
+			//Commission on Order Status Change
+			//Commission on Order Status Change
+			$order_products = $this->getVendorOrderProducts($order_id);
+				foreach ($order_products as $order_product) {
+						$dsds1 = "SELECT `seller_id`,`order_status_id` FROM `" . DB_PREFIX . "purpletree_vendor_orders_history` WHERE order_id = '" . (int)$order_id . "' && seller_id = '" . (int)$order_product['seller_id'] . "' order by `id` DESC";
+						$query1112 = $this->db->query($dsds1);
+						$sdsds11 = $query1112->row;
+						if(empty($sdsds11)) {
+							$this->db->query("INSERT INTO " . DB_PREFIX . "purpletree_vendor_orders_history SET order_id = '" . (int)$order_id . "', seller_id ='". (int)$order_product['seller_id'] ."', order_status_id = '" . (int)$order_status_id . "', notify = '" . (int)$notify . "', comment = '" . $this->db->escape($comment) . "', created_at = NOW()");
+							$ordststid = $order_status_id;
+						} else {
+							$ordststid = $sdsds11['order_status_id'];
+						}
+							$this->db->query("UPDATE `" . DB_PREFIX . "purpletree_vendor_orders` SET order_status_id = '" . (int)$ordststid . "', updated_at = NOW() WHERE order_id = '" . (int)$order_id . "' && product_id = '" . (int)$order_product['product_id'] . "'");
+			if (null !== $this->config->get('module_purpletree_multivendor_commission_status') && $this->config->get('module_purpletree_multivendor_commission_status') != $order_status_id) {
+                    $this->db->query("UPDATE " . DB_PREFIX . "purpletree_vendor_commissions SET  commission_fixed = '0', commission_percent = '0', commission = '0', status = 'Order Cancelled', updated_at = NOW() WHERE order_id = '" . (int)$order_id . "'  AND product_id = '" . (int)$order_product['product_id'] . "'");
+                }
+			} 
+			if (null !== $this->config->get('module_purpletree_multivendor_commission_status') && $this->config->get('module_purpletree_multivendor_commission_status') == $order_status_id) {
+				$sellerorders = $this->db->query("SELECT * FROM `" . DB_PREFIX . "purpletree_vendor_orders` WHERE order_id = '" . (int)$order_id . "'");
+				
+				$shipcommsvirtial = '0';
+				$dsdsds = array();
+				if(!empty($sellerorders->rows)) {
+					foreach($sellerorders->rows as $sellerorder) {
+						$sql1111 = "SELECT `store_commission` FROM `" . DB_PREFIX . "purpletree_vendor_stores` WHERE seller_id = '" . (int)$sellerorder['seller_id'] . "'";
+										
+						$query = $this->db->query($sql1111);
+						$seller_commission = $query->row;
+						if($sellerorder['order_status_id'] == $this->config->get('module_purpletree_multivendor_commission_status')) {
+							 //category_commission
+				        $productid = $sellerorder['product_id'];	
+						$catids =$this->getProductCategory($productid );
+						$commission_cat = array();
+						$catttt = array();
+
+						if(!empty($catids)){
+							foreach($catids as $cat) {
+								$sql = "SELECT * FROM " . DB_PREFIX . "purpletree_vendor_categories_commission where category_id = '".(int)$cat['category_id']."'";
+								$query = $this->db->query($sql);
+								$commission_cat[] = $query->rows;
+							}
+								
+						}
+						$commission = -1;
+						$commission1 = -1;
+						$comipercen = 0;
+						$comifixs = 0;
+						
+						if(!empty($commission_cat)) {
+						 foreach($commission_cat as $catts) {
+						 foreach($catts as $catt) {
+								$comifix = 0;
+							 if(isset($catt['commison_fixed']) && $catt['commison_fixed'] != '') {
+								$comifix = $catt['commison_fixed'];
+							 }
+								$comiper = 0;
+							 if(isset($catt['commission']) && $catt['commission'] != '') {
+								$comiper = $catt['commission'];
+							 }
+							
+							 if (null !== $this->config->get('module_purpletree_multivendor_seller_group') && $this->config->get('module_purpletree_multivendor_seller_group') == 1) {
+								$sqlgrop = "Select `customer_group_id` from `" . DB_PREFIX . "customer` where customer_id= ".$sellerorder['seller_id']." ";
+								$querygrop = $this->db->query($sqlgrop);
+								$sellergrp = $querygrop->row;
+								if($catt['seller_group'] == $sellergrp['customer_group_id']) {
+									$commipercent = (($comiper*$sellerorder['total_price'])/100);
+									$commission1 = $comifix + $commipercent;
+									if($commission1 > $commission) {
+										$comipercen 		= $comiper;
+										$comifixs 			= $comifix;
+										
+										$commission 		= $commission1;
+									}
+								}
+							 } else {
+								 $commipercent = (($comiper*$sellerorder['total_price'])/100);
+									$commission1 = $comifix + $commipercent;
+									if($commission1 > $commission) {
+										$comipercen 		= $comiper;
+										$comifixs 			= $comifix;
+										
+										$commission 		= $commission1;
+									} 
+							 }
+						   }
+						 }
+						}
+						if($commission != -1) {
+							$commission = $commission;
+						}
+						//category_commission
+						elseif(isset($seller_commission['store_commission']) && ($seller_commission['store_commission'] != NULL || $seller_commission['store_commission'] != '')){
+							$comipercen = $seller_commission['store_commission'];
+							$commission = (($sellerorder['total_price']*$seller_commission['store_commission'])/100);
+						} else {
+							$comipercen = $this->config->get('module_purpletree_multivendor_commission');
+							$commission = (($sellerorder['total_price']*$this->config->get('module_purpletree_multivendor_commission'))/100);
+						}
+						$this->db->query("UPDATE " . DB_PREFIX . "purpletree_vendor_commissions SET commission_fixed = '".$comifixs."', commission_percent = '".$comipercen."', commission = '" . (float)$commission . "', status = 'Complete', updated_at = NOW() WHERE order_id = '" . (int)$order_id . "' && product_id ='".(int)$sellerorder['product_id']."' && seller_id = '" . (int)$sellerorder['seller_id'] . "'");
+						} else {
+							$this->db->query("UPDATE " . DB_PREFIX . "purpletree_vendor_commissions SET  commission_fixed = '0', commission_percent = '0',  commission = '0', status = 'Pending', updated_at = NOW() WHERE order_id = '" . (int)$order_id . "' && product_id ='".(int)$sellerorder['product_id']."' && seller_id = '" . (int)$sellerorder['seller_id'] . "'");
+						}
+					}
+				}
+			}
+			]]></add>
+		</operation>
+		<operation error="skip">
+			<search><![CDATA[$this->db->query("DELETE FROM `" . DB_PREFIX . "order` WHERE order_id = '" . (int)$order_id . "'");]]></search>
+			<add position="after"><![CDATA[
+			/*** Delete seller order tables ***/
+			$this->db->query("DELETE FROM `" . DB_PREFIX . "purpletree_vendor_orders` WHERE order_id = '" . (int)$order_id . "'");
+			$this->db->query("DELETE FROM `" . DB_PREFIX . "purpletree_vendor_commissions` WHERE order_id = '" . (int)$order_id . "'");
+			$this->db->query("DELETE FROM `" . DB_PREFIX . "purpletree_order_total` WHERE order_id = '" . (int)$order_id . "'");
+			$this->db->query("DELETE FROM `" . DB_PREFIX . "purpletree_vendor_orders_history` WHERE order_id = '" . (int)$order_id . "'");
+			]]></add>
+		</operation>
+	</file>
+		<file path="catalog/controller/mail/register.php">
+			<operation error="skip">
+		<search><![CDATA[if (in_array('account', (array)$this->config->get('config_mail_alert'))) {]]></search>
+					<add position="after"><![CDATA[
+					$this->load->language('mail/register');
+					/////// Start alert mail for admin///////////
+			if(isset($args[0]['become_seller']) && $args[0]['become_seller'] == 1) {
+			$this->load->language('account/ptsregister');
+			
+			$data['text_signup_seller'] = $this->language->get('text_signup_seller');
+			$data['text_firstname'] = $this->language->get('text_firstname');
+			$data['text_lastname'] = $this->language->get('text_lastname');
+			$data['text_customer_group'] = $this->language->get('text_customer_group');
+			$data['text_email'] = $this->language->get('text_email');
+			$data['text_telephone'] = $this->language->get('text_telephone');
+			
+			$data['firstname'] = $args[0]['firstname'];
+			$data['lastname'] = $args[0]['lastname'];
+			
+			$this->load->model('account/customer_group');
+			
+			if (isset($args[0]['customer_group_id'])) {
+				$customer_group_id = $args[0]['customer_group_id'];
+			} else {
+				$customer_group_id = $this->config->get('config_customer_group_id');
+			}
+			
+			$customer_group_info = $this->model_account_customer_group->getCustomerGroup($customer_group_id);
+			
+			if ($customer_group_info) {
+				$data['customer_group'] = $customer_group_info['name'];
+			} else {
+				$data['customer_group'] = '';
+			}
+			
+			$data['email'] = $args[0]['email'];
+			$data['telephone'] = $args[0]['telephone'];
+
+			$mail = new Mail($this->config->get('config_mail_engine'));
+			$mail->parameter = $this->config->get('config_mail_parameter');
+			$mail->smtp_hostname = $this->config->get('config_mail_smtp_hostname');
+			$mail->smtp_username = $this->config->get('config_mail_smtp_username');
+			$mail->smtp_password = html_entity_decode($this->config->get('config_mail_smtp_password'), ENT_QUOTES, 'UTF-8');
+			$mail->smtp_port = $this->config->get('config_mail_smtp_port');
+			$mail->smtp_timeout = $this->config->get('config_mail_smtp_timeout');
+
+			$mail->setTo($this->config->get('config_email'));
+			$mail->setFrom($this->config->get('config_email'));
+			$mail->setSender(html_entity_decode($this->config->get('config_name'), ENT_QUOTES, 'UTF-8'));
+			$mail->setSubject(html_entity_decode($this->language->get('text_new_Seller'), ENT_QUOTES, 'UTF-8'));
+			$mail->setText($this->load->view('account/purpletree_multivendor/register_alertmail', $data));
+			$mail->send();
+
+			// Send to additional alert emails if new account email is enabled
+			$emails1 = explode(',', $this->config->get('config_mail_alert_email'));
+
+			foreach ($emails1 as $email1) {
+				if (utf8_strlen($email1) > 0 && filter_var($email1, FILTER_VALIDATE_EMAIL)) {
+					$mail->setTo($email1);
+					$mail->send();
+				}
+			}
+		  }
+		  /////// End alert mail for admin///////////
+					]]></add>
+		</operation>
+					<operation error="skip">
+		<search><![CDATA[index(&$route, &$args, &$output) {]]></search>
+					<add position="after"><![CDATA[
+					$this->load->language('mail/register');
+						////// Start register mail for seller////////////
+		if(isset($args[0]['become_seller']) && $args[0]['become_seller'] == 1){
+		$this->load->language('account/ptsregister');
+			$data['text_welcome'] = sprintf($this->language->get('text_welcome'), html_entity_decode($this->config->get('config_name'), ENT_QUOTES, 'UTF-8'));
+			$data['text_login'] = $this->language->get('text_login');
+			$data['text_approval'] = $this->language->get('text_approval');
+			$data['text_service'] = $this->language->get('text_service');
+			$data['text_thanks'] = $this->language->get('text_thanks');
+			$this->load->model('account/customer_group');
+				
+			if (isset($args[0]['customer_group_id'])) {
+				$customer_group_id = $args[0]['customer_group_id'];
+			} else {
+				$customer_group_id = $this->config->get('config_customer_group_id');
+			}
+			$data['text_admin'] ="";
+			if($this->config->get('module_purpletree_multivendor_seller_approval') == 1){
+				$data['text_admin'] = $this->language->get('text_admin');
+			}
+						
+			$customer_group_info = $this->model_account_customer_group->getCustomerGroup($customer_group_id);
+			
+			if ($customer_group_info) {
+				$data['approval'] = $customer_group_info['approval'];
+			} else {
+				$data['approval'] = '';
+			}
+				
+			$data['login'] = $this->url->link('account/login', '', true);		
+			$data['store'] = html_entity_decode($this->config->get('config_name'), ENT_QUOTES, 'UTF-8');
+
+			$mail = new Mail($this->config->get('config_mail_engine'));
+			$mail->parameter = $this->config->get('config_mail_parameter');
+			$mail->smtp_hostname = $this->config->get('config_mail_smtp_hostname');
+			$mail->smtp_username = $this->config->get('config_mail_smtp_username');
+			$mail->smtp_password = html_entity_decode($this->config->get('config_mail_smtp_password'), ENT_QUOTES, 'UTF-8');
+			$mail->smtp_port = $this->config->get('config_mail_smtp_port');
+			$mail->smtp_timeout = $this->config->get('config_mail_smtp_timeout');
+
+			$mail->setTo($args[0]['email']);
+			$mail->setFrom($this->config->get('config_email'));
+			$mail->setSender(html_entity_decode($this->config->get('config_name'), ENT_QUOTES, 'UTF-8'));
+			$mail->setSubject(sprintf($this->language->get('text_subject_seller'), html_entity_decode($this->config->get('config_name'), ENT_QUOTES, 'UTF-8')));
+			$mail->setText($this->load->view('account/purpletree_multivendor/register_mail', $data));
+			$mail->send();
+		}
+		//////End register mail for seller////////////
+				]]></add>
+			</operation>
+	</file>
+	<file path="catalog/controller/account/register.php">
+			<operation error="skip">
+		<search><![CDATA[$this->load->language('account/register');]]></search>
+					<add position="after"><![CDATA[
+					$this->load->language('account/ptsregister');
+				]]></add>
+			</operation>
+			
+		<operation error="skip">
+			<search><![CDATA[if (isset($this->error['warning'])) {]]></search>
+			<add position="before"><![CDATA[
+			$data['module_purpletree_multivendor_status'] = $this->config->get('module_purpletree_multivendor_status');
+			$data['module_purpletree_multivendor_become_seller'] = $this->config->get('module_purpletree_multivendor_become_seller');
+			if ($this->config->get('module_purpletree_multivendor_become_seller')) {
+				$data['text_seller'] = $this->language->get('text_seller');
+				$data['text_seller_heading'] = $this->language->get('text_seller_heading');
+				$data['text_store_name'] = $this->language->get('text_store_name');
+			}
+			if (isset($this->request->post['become_seller'])) {
+			$data['become_seller'] = $this->request->post['become_seller'];
+			} else {
+				$data['become_seller'] = '';
+			}
+			if (isset($this->request->post['seller_storename'])) {
+				$data['seller_storename'] = $this->request->post['seller_storename'];
+			} else {
+				$data['seller_storename'] = '';
+			}
+			]]></add>
+		</operation>
+		<operation error="skip">
+			<search><![CDATA[$customer_id = $this->model_account_customer->addCustomer($this->request->post);]]></search>
+			<add position="after"><![CDATA[
+			if ($this->config->get('module_purpletree_multivendor_become_seller')) {
+				if($this->request->post['become_seller']=="1"){
+					$store_name = trim($this->request->post['seller_storename']);
+					$this->load->model('extension/purpletree_multivendor/vendor');
+					$file = '';
+					$seller_id = $this->model_extension_purpletree_multivendor_vendor->addSeller($customer_id,$store_name ,$file);
+					}
+				}
+			
+			]]></add>
+		</operation>
+		<operation error="skip">
+			<search><![CDATA[private function validate() {]]></search>
+			<add position="after"><![CDATA[
+			$this->load->model('extension/purpletree_multivendor/vendor');
+			
+			 if($this->config->get('module_purpletree_multivendor_become_seller')) { 
+			if($this->request->post['become_seller']){
+				$data['become_seller'] = $this->request->post['become_seller'];	
+			if((utf8_strlen($this->request->post['seller_storename']) < 5) || (utf8_strlen(trim($this->request->post['seller_storename'])) > 50)) {
+			$this->error['seller_store'] = $this->language->get('error_storename');
+		}
+		
+		$store_info1 = $this->model_extension_purpletree_multivendor_vendor->getStoreNameByStoreName($this->request->post['seller_storename']);	
+		//echo"<pre>";print_r($this->request->post['seller_storename']);die;
+        if ($store_info1 && (strtoupper(trim($this->request->post['seller_storename']))==strtoupper($store_info1['store_name']))) {
+				$this->error['seller_store'] = $this->language->get('error_exist_storename');
+				$this->error['warning'] = $this->language->get('error_exist_storename');
+		}
+		
+		}
+		}
+			]]></add>
+		</operation>
+		<operation error="skip">
+			<search><![CDATA[if (isset($this->error['confirm'])) {]]></search>
+			<add position="before"><![CDATA[
+			if (isset($this->error['seller_store'])) {
+				$data['error_sellerstore'] = $this->error['seller_store'];
+			} else {
+				$data['error_sellerstore'] = '';
+			}
+			if (isset($this->error['warning1'])) {
+			$data['error_warning1'] = $this->error['warning1'];
+			} else {
+				$data['error_warning1'] = '';
+			}
+			]]></add>
+		</operation>
+	</file>
+
+	<file path="catalog/view/theme/*/template/account/register.twig">
+		<operation error="skip">
+			<search><![CDATA[{{ captcha }}]]></search>
+			<add position="before" offset="0"><![CDATA[
+			{% if module_purpletree_multivendor_status and module_purpletree_multivendor_become_seller %}
+			<fieldset>
+			<legend>{{ text_seller_heading }}</legend>
+				<div class="form-group clearfix">
+				<label class="col-sm-2 control-label">{{ text_seller }}</label>
+				<div class="col-sm-10">
+				<label class="radio-inline">
+				 <input type="radio" {% if become_seller == 1 %} checked="checked" {% endif %} name="become_seller"  value="1" id="add_document" /> 
+                {{ text_yes }}</label>
+				<label class="radio-inline">
+               <input type="radio" name="become_seller" value="0" checked="checked" id="remove_document"/>
+                {{ text_no }}</label>
+            </div>
+            </div>
+			<div class="form-group clearfix">
+				<label class="col-sm-2 control-label">{{ text_store_name }}</label>
+				<div class="col-sm-10">
+				 <input type="text" name="seller_storename" value="{{ seller_storename }}" class="form-control"  />
+				 {% if error_sellerstore %}
+              <div class="text-danger">{{ error_sellerstore }}</div>
+              {% endif %}
+            </div>
+            </div>
+			</fieldset>
+			{% endif %}
+			]]></add>
+		</operation>
+	</file>
+	<file path="catalog/view/theme/*/template/account/register.twig">
+		<operation error="skip">
+			<search><![CDATA[$captcha;]]></search>
+			<add position="before" offset="0"><![CDATA[
+			{% if (purpletree_multivendor_status in not empty) and (purpletree_multivendor_become_seller) is not empty %}
+			<fieldset>
+			<legend>{{ text_seller_heading }}</legend>
+				<div class="pts-form-group clearfix">
+				<label class="pts-col-sm-2 pts-control-label">{{ text_seller }}</label>
+				<div class="pts-col-sm-10">
+				<label class="radio-inline">
+				 <input type="radio" {% if become_seller == 1 %} checked="checked" {% endif %} name="become_seller"  value="1" id="add_document" /> 
+                {{ text_yes }}</label>
+				<label class="radio-inline">
+               <input type="radio" name="become_seller" value="0" checked="checked" id="remove_document"/>
+                {{ text_no }}</label>
+            </div>
+            </div>
+			<div class="pts-form-group clearfix">
+				<label class="pts-col-sm-2 pts-control-label">{{ text_store_name }}</label>
+				<div class="pts-col-sm-10">
+				 <input type="text" name="seller_storename" value="{{ seller_storename }}" class="form-control"  />
+				{% if error_sellerstore %}
+              <div class="text-danger">{{ error_sellerstore }}</div>
+              {% endif %}
+            </div>
+            </div>
+            </div>
+			
+			</fieldset>
+			{% endif %}
+			]]></add>
+		</operation>
+		<operation error="skip">
+			<search><![CDATA[{{ column_left }}]]></search>
+			<add position="before" offset="0"><![CDATA[
+			 {% if error_warning1 %}
+			  <div class="alert alert-danger"><i class="fa fa-exclamation-circle"></i> {{ error_warning1 }}</div>
+			  {% endif %}
+			]]></add>
+		</operation>
+	</file>
+	<file path="system/library/cart/cart.php">
+		<operation error="skip">
+			<search><![CDATA[public function getSubTotal() {]]></search>
+			<add position="before"><![CDATA[
+			/**** get order total when seller shipping is enabled *****/
+
+			]]></add>
+		</operation>
+	</file>
+<file path="system/library/cart/customer.php">
+		<operation error="skip">
+			<search><![CDATA[class Customer {]]></search>
+			<add position="before"><![CDATA[
+			if( !function_exists('apache_request_headers') ) {
+///
+function apache_request_headers() {
+  $arh = array();
+  $rx_http = '/\AHTTP_/';
+  foreach($_SERVER as $key => $val) {
+    if( preg_match($rx_http, $key) ) {
+      $arh_key = preg_replace($rx_http, '', $key);
+      $rx_matches = array();
+      // do some nasty string manipulations to restore the original letter case
+      // this should work in most cases
+      $rx_matches = explode('_', $arh_key);
+      if( count($rx_matches) > 0 and strlen($arh_key) > 2 ) {
+        foreach($rx_matches as $ak_key => $ak_val) $rx_matches[$ak_key] = ucfirst($ak_val);
+        $arh_key = implode('-', $rx_matches);
+      }
+      $arh[$arh_key] = $val;
+    }
+  }
+  return( $arh );
+}
+} ]]></add>
+		</operation>
+			<operation error="skip">
+			<search><![CDATA[public function getRewardPoints() {]]></search>
+			<add position="before"><![CDATA[
+			/********* Check if customer is a seller also ***********/
+			public function isSeller(){
+			if ($this->config->get('module_purpletree_multivendor_status')) {
+		$query = $this->db->query("SELECT id, store_status, is_removed FROM " . DB_PREFIX . "purpletree_vendor_stores where seller_id='".$this->customer_id."'");
+		return $query->row;
+	}
+	}
+
+	]]></add>
+		</operation>
+	</file>
+	<file path="catalog/controller/product/product.php">
+		<operation error="skip">
+			<search><![CDATA[$this->load->language('product/product');]]></search>
+			<add position="after"><![CDATA[
+			$this->load->language('account/ptsregister');
+			$data['text_seller_label'] = $this->language->get('text_seller_label');
+			$data['text_seller_review'] = $this->language->get('text_seller_review');
+			$data['text_seller_rating'] = $this->language->get('text_seller_rating');
+			$data['text_seller_contact'] = $this->language->get('text_seller_contact');]]></add>
+		</operation>
+		<operation error="skip">
+			<search><![CDATA[$product_id = (int)$this->request->get['product_id'];]]></search>
+			<add position="after"><![CDATA[
+						if(isset($this->session->data['seller_sto_page'])) {
+				unset($this->session->data['seller_sto_page']);
+			}
+			/******* get seller details to show on product page *******/
+			$data['seller_review_status'] = $this->config->get('module_purpletree_multivendor_seller_review');
+			$data['seller_detail'] = array();
+			if($this->config->get('module_purpletree_multivendor_status')){
+				
+				$currentpage = $_SERVER["SERVER_NAME"].$_SERVER["REQUEST_URI"];
+				$this->session->data['ptsmv_current_page'] = $currentpage;
+				$this->load->model('extension/purpletree_multivendor/sellerproduct');
+				$this->load->model('extension/purpletree_multivendor/vendor');
+				$seller_detail = $this->model_extension_purpletree_multivendor_sellerproduct->getSellername($product_id);
+				if($seller_detail){
+				$seller_detailss = $this->model_extension_purpletree_multivendor_vendor->getStoreDetail($seller_detail['seller_id']);
+
+					$seller_rating = $this->model_extension_purpletree_multivendor_vendor->getStoreRating($seller_detail['seller_id']);
+					$data['seller_detail'] = array(
+						'seller_name' => $seller_detail['store_name'],
+						'store_id' => $seller_detail['id'],
+						'seller_rating' => (isset($seller_rating['rating'])?$seller_rating['rating']:'0'),
+						'seller_count' => (isset($seller_rating['count'])?$seller_rating['count']:'0'),
+						'seller_href' => $this->url->link('extension/account/purpletree_multivendor/sellerstore/storeview', 'seller_store_id=' . $seller_detail['id']),
+						'seller_review_link' => $this->url->link('extension/account/purpletree_multivendor/sellerstore/sellerreview', 'seller_id=' . $seller_detail['seller_id']),
+						'seller_contact_link' => $this->url->link('extension/account/purpletree_multivendor/sellercontact/customerReply', 'seller_id=' . $seller_detail['seller_id'])
+					);
+				}
+			}]]></add>
+		</operation>
+	</file>
+
+	<file path="catalog/view/theme/*/template/product/product.twig">
+			<operation error="skip">
+			<search><![CDATA[{% if reward %}]]></search>
+			<add position="before"><![CDATA[{% if seller_detail %}
+				<li>{{ text_seller_label }} <a href="{{ seller_detail.seller_href }}">{{ seller_detail.seller_name }}</a></li>
+				{% if seller_review_status %}
+				<li>{% if seller_detail.seller_rating %}
+				<div class="rating =" style="display:inline !important;">
+							{{ text_seller_rating }}&nbsp;&nbsp;&nbsp;
+							  {% for i in 1..5 %}
+							  {% if seller_detail.seller_rating < i %}
+							  <span class="fa fa-stack" style="min-width:0;"><i class="fa fa-star-o fa-stack-1x"></i></span>
+							  {% else %}
+							  <span class="fa fa-stack" style="min-width:0;"><i class="fa fa-star fa-stack-1x"></i></span>
+							 {% endif %}
+							  {% endfor %}
+							  <a href="{{ seller_detail.seller_review_link }}">{{ seller_detail.seller_count }} {{ text_seller_review }}</a>
+							</div>
+							{% else %}
+							<div class="rating" style="display:inline !important;" >{{ text_seller_rating }}&nbsp;&nbsp;&nbsp;
+								{% for i in 1..5 %}
+									<span class="fa fa-stack" style="min-width:0;"><i class="fa fa-star-o fa-stack-1x"></i></span>
+								{% endfor %}
+								<a href="{{ seller_detail.seller_review_link }}">{{ seller_detail.seller_count }} {{ text_seller_review }}</a>
+							</div>
+							{% endif %}</li>
+				{% endif %}
+					<li><a href="{{ seller_detail.seller_contact_link }}">{{ text_seller_contact }}</a></li>
+			{% endif %}]]></add>
+		</operation>
+	</file>
+	
+	<file path="catalog/controller/checkout/checkout.php">
+		<operation error="skip">
+			<search><![CDATA[if ($product['minimum'] > $product_total) {]]></search>
+			<add position="before"><![CDATA[
+			/******* validate seller and check for maximum product limit ********/
+				if($this->config->get('module_purpletree_multivendor_status')){
+				if ($this->config->get('module_purpletree_multivendor_product_limit') < $product_total) {
+				$this->response->redirect($this->url->link('checkout/cart'));
+			}
+			}
+			]]></add>
+		</operation>
+	</file>
+	<file path="catalog/controller/checkout/cart.php">
+		<operation error="skip">
+			<search><![CDATA[if ($product['minimum'] > $product_total) {]]></search>
+			<add position="before"><![CDATA[
+			/********** Check for maximim product limit ************/
+			$this->load->language('account/ptsregister');
+			if($this->config->get('module_purpletree_multivendor_status')){
+				if ($this->config->get('module_purpletree_multivendor_product_limit') < $product_total) {
+				$data['error_warning'] = sprintf($this->language->get('error_maximum'), $product['name'], $this->config->get('module_purpletree_multivendor_product_limit'));
+			}
+			}
+			]]></add>
+		</operation>
+		<operation error="skip">
+			<search><![CDATA[$data['action'] = $this->url->link('checkout/cart/edit', '', true);]]></search>
+			<add position="before"><![CDATA[
+			if (isset($this->session->data['error_warning'])) {
+				$data['error_warning'] = $this->session->data['error_warning'];
+
+				unset($this->session->data['error_warning']);
+			}
+			]]></add>
+		</operation>
+	</file>
+	<file path="catalog/controller/startup/seo_url.php">
+		<operation error="skip">
+			<search><![CDATA[if ($url[0] == 'category_id') {]]></search>
+			<add position="before"><![CDATA[if ($url[0] == 'seller_store_id') {
+						$this->request->get['seller_store_id'] = $url[1];
+					}
+			]]></add>
+		</operation>
+		<operation error="skip">
+			<search><![CDATA[if ($query->row['query'] && $url[0] != 'information_id' && $url[0] != 'manufacturer_id' && $url[0] != 'category_id' && $url[0] != 'product_id') {]]></search>
+			<add position="replace" offset="0"><![CDATA[if ($query->row['query'] && $url[0] != 'information_id' && $url[0] != 'manufacturer_id' && $url[0] != 'category_id' && $url[0] != 'product_id' && $url[0] != 'seller_store_id') {
+			]]></add>
+		</operation>
+		<operation error="skip">
+			<search><![CDATA[
+			 if ($query->row['query'] && $url[0] != 'information_id' && $url[0] != 'manufacturer_id' && $url[0] != 'category_id' && $url[0] != 'product_id' && $url[0] != 'simple_blog_article_id' && $url[0] != 'simple_blog_category_id' && $url[0] != 'simple_blog_author_id') {
+			 ]]></search>
+						<add position="replace" offset="0"><![CDATA[
+			 if ($query->row['query'] && $url[0] != 'information_id' && $url[0] != 'manufacturer_id' && $url[0] != 'category_id' && $url[0] != 'product_id' && $url[0] != 'simple_blog_article_id' && $url[0] != 'simple_blog_category_id' && $url[0] != 'simple_blog_author_id' && $url[0] != 'seller_store_id') {
+			 ]]></add>
+        </operation>
+		<operation error="skip">
+			<search><![CDATA[$this->request->get['route'] = 'information/information';]]></search>
+			<add position="replace" offset="0"><![CDATA[
+			$this->request->get['route'] = 'information/information';
+				} elseif (isset($this->request->get['seller_store_id'])) {
+					$this->request->get['route'] = 'extension/account/purpletree_multivendor/sellerstore/storeview';
+			]]></add>
+		</operation>
+		<operation error="skip">
+            <search><![CDATA[} elseif ($key == 'path') {]]></search>
+             <add position="replace"><![CDATA[} elseif ($data['route'] == 'extension/account/purpletree_multivendor/sellerstore/storeview' && $key == 'seller_store_id') {
+                    $query = $this->db->query("SELECT * FROM " . DB_PREFIX . "seo_url WHERE `query` = '" . $this->db->escape($key . '=' . (int)$value) . "' AND store_id = '" . (int)$this->config->get('config_store_id') . "'");
+
+                    if ( $query->num_rows && $query->row['keyword'] ) {
+                        $url .=  '/' . $query->row['keyword'];
+
+                        unset( $data[$key] );
+                    }
+                } elseif ($key == 'path') {]]></add>
+         </operation>
+	</file>
+	
+	<file path="catalog/controller/common/header.php">
+		<operation error="skip">
+			<search><![CDATA[$data['menu']]]></search>
+			<add position="before"><![CDATA[
+			/***** Show browse seller link in header ******/
+			$this->load->language('account/ptsregister');
+			 $data['direction'] = $this->language->get('direction');
+			 $data['module_purpletree_multivendor_browse_sellers'] = $this->config->get('module_purpletree_multivendor_browse_sellers');
+			$data['text_browse_sellers'] = $this->language->get('text_browse_sellers');
+			$data['browse_seller_link'] = $this->url->link('extension/account/purpletree_multivendor/sellers');
+			]]></add>
+		</operation>
+	</file>
+	<file path="catalog/view/theme/*/template/journal2/headers/mega.twig">
+		<operation error="skip">
+			<search><![CDATA[{{ journal2.settings.get('config_secondary_menu') }}]]></search>
+			<add position="before"><![CDATA[
+			{% if module_purpletree_multivendor_browse_sellers %}
+			<li><a href="{{ browse_seller_link }}"><i class="fa fa-users" aria-hidden="true"></i><span class=""> {{ text_browse_sellers }}</span></a></li>
+			{% endif %}
+			]]></add>
+		</operation>
+	</file>
+	<file path="catalog/view/theme/*/template/journal2/headers/center.twig">
+		<operation error="skip">
+			<search><![CDATA[{{ journal2.settings.get('config_secondary_menu') }}]]></search>
+			<add position="before"><![CDATA[
+			{% if module_purpletree_multivendor_browse_sellers %}
+			<li><a href="{{ browse_seller_link }}"><i class="fa fa-users" aria-hidden="true"></i><span class=""> {{ text_browse_sellers }}</span></a></li>
+			{% endif %}
+			]]></add>
+		</operation>
+	</file>
+	<file path="catalog/view/theme/journal3/template/journal3/headers/desktop/slim.twig">
+		<operation error="skip">
+			<search><![CDATA[<div class="language-currency top-menu">]]></search>
+			<add position="before"><![CDATA[
+			{% if module_purpletree_multivendor_browse_sellers %}
+			<li><i class="fa fa-users" aria-hidden="true"></i> <span><a href="{{ browse_seller_link }}">{{ text_browse_sellers }}</a></span></li>
+			{% endif %}
+			]]></add>
+		</operation>
+	</file>
+	<file path="catalog/view/theme/journal3/template/journal3/headers/desktop/mega.twig">
+		<operation error="skip">
+			<search><![CDATA[<div class="language-currency top-menu">]]></search>
+			<add position="before"><![CDATA[
+			{% if module_purpletree_multivendor_browse_sellers %}
+			<li><i class="fa fa-users" aria-hidden="true"></i> <span><a href="{{ browse_seller_link }}">{{ text_browse_sellers }}</a></span></li>
+			{% endif %}
+			]]></add>
+		</operation>
+	</file>
+	<file path="catalog/view/theme/journal3/template/journal3/headers/desktop/default.twig">
+		<operation error="skip">
+			<search><![CDATA[<div class="language-currency top-menu">]]></search>
+			<add position="before"><![CDATA[
+			{% if module_purpletree_multivendor_browse_sellers %}
+			<li><i class="fa fa-users" aria-hidden="true"></i> <span><a href="{{ browse_seller_link }}">{{ text_browse_sellers }}</a></span></li>
+			{% endif %}
+			]]></add>
+		</operation>
+	</file>
+	<file path="catalog/view/theme/journal3/template/journal3/headers/desktop/default2.twig">
+		<operation error="skip">
+			<search><![CDATA[<div class="language-currency top-menu">]]></search>
+			<add position="before"><![CDATA[
+			{% if module_purpletree_multivendor_browse_sellers %}
+			<li><i class="fa fa-users" aria-hidden="true"></i> <span><a href="{{ browse_seller_link }}">{{ text_browse_sellers }}</a></span></li>
+			{% endif %}
+			]]></add>
+		</operation>
+	</file>
+	<file path="catalog/view/theme/journal3/template/journal3/headers/desktop/compact.twig">
+		<operation error="skip">
+			<search><![CDATA[<div class="language-currency top-menu">]]></search>
+			<add position="before"><![CDATA[
+			{% if module_purpletree_multivendor_browse_sellers %}
+			<li><i class="fa fa-users" aria-hidden="true"></i> <span><a href="{{ browse_seller_link }}">{{ text_browse_sellers }}</a></span></li>
+			{% endif %}
+			]]></add>
+		</operation>
+	</file>
+	<file path="catalog/view/theme/journal3/template/journal3/headers/desktop/classic.twig">
+		<operation error="skip">
+			<search><![CDATA[<div class="language-currency top-menu">]]></search>
+			<add position="before"><![CDATA[
+			{% if module_purpletree_multivendor_browse_sellers %}
+			<li><i class="fa fa-users" aria-hidden="true"></i> <span><a href="{{ browse_seller_link }}">{{ text_browse_sellers }}</a></span></li>
+			{% endif %}
+			]]></add>
+		</operation>
+	</file>
+			
+			<file path="catalog/view/theme/*/template/journal2/headers/compact.twig">
+		<operation error="skip">
+			<search><![CDATA[<ul class="top-menu">]]></search>
+			<add position="after"><![CDATA[
+			{% if module_purpletree_multivendor_browse_sellers %}
+			<li><a href="{{ browse_seller_link }}"><i class="fa fa-users" aria-hidden="true"></i><span class=""> {{ text_browse_sellers }}</span></a></li>
+			{% endif %}
+			]]></add>
+		</operation>
+	</file>
+	<file path="catalog/view/theme/*/template/journal2/headers/default.twig">
+		<operation error="skip">
+			<search><![CDATA[{{ journal2.settings.get('config_secondary_menu') }}]]></search>
+			<add position="before"><![CDATA[
+			{% if module_purpletree_multivendor_browse_sellers %}
+			<li><a href="{{ browse_seller_link }}"><i class="fa fa-users" aria-hidden="true"></i><span class=""> {{ text_browse_sellers }}</span></a></li>
+			{% endif %}
+			]]></add>
+		</operation>
+	</file>
+	<file path="catalog/view/theme/*/template/common/header.twig">
+		
+		<operation error="skip"> 
+			<search><![CDATA[<base]]></search>
+			<add offset="0" position="before"><![CDATA[
+			<script src="catalog/view/javascript/purpletree/jquery/jquery-2.1.1.min.js" type="text/javascript"></script>
+{% if direction=='rtl' %}
+<link href="catalog/view/javascript/purpletree/bootstrap/css/bootstrap.min-a.css" rel="stylesheet" media="screen" />
+<link href="catalog/view/theme/default/stylesheet/purpletree/custom-a.css" rel="stylesheet">
+{% else %}
+<link href="catalog/view/javascript/purpletree/bootstrap/css/bootstrap.min.css" rel="stylesheet" media="screen" />
+<link href="catalog/view/theme/default/stylesheet/purpletree/custom.css" rel="stylesheet">
+{% endif %}
+			]]></add>
+		</operation>
+		<operation error="skip">
+			<search><![CDATA[<ul class="list-inline">]]></search>
+			<add position="after" offset="0"><![CDATA[
+			{% if module_purpletree_multivendor_browse_sellers %}
+			<li><i class="fa fa-users" aria-hidden="true"></i> <span><a href="{{ browse_seller_link }}">{{ text_browse_sellers }}</a></span></li>
+			{% endif %}
+			]]></add>
+		</operation>
+		<operation error="skip">
+			<search><![CDATA[</head>]]></search>
+			<add position="before"><![CDATA[
+			<script src="catalog/view/javascript/purpletree/common.js" type="text/javascript"></script>	
+			]]></add>
+		</operation>
+	</file>
+	<file path="catalog/view/theme/*/template/common/header1.twig">
+		
+		<operation error="skip">
+			<search><![CDATA[<base]]></search>
+			<add offset="0" position="before"><![CDATA[
+			<script src="catalog/view/javascript/purpletree/jquery/jquery-2.1.1.min.js" type="text/javascript"></script>
+{% if direction=='rtl' %}
+<link href="catalog/view/javascript/purpletree/bootstrap/css/bootstrap.min-a.css" rel="stylesheet" media="screen" />
+<link href="catalog/view/theme/default/stylesheet/purpletree/custom-a.css" rel="stylesheet">
+{% else %}
+<link href="catalog/view/javascript/purpletree/bootstrap/css/bootstrap.min.css" rel="stylesheet" media="screen" />
+<link href="catalog/view/theme/default/stylesheet/purpletree/custom.css" rel="stylesheet">
+{% endif %}
+			]]></add>
+		</operation>
+		<operation error="skip">
+			<search><![CDATA[<ul class="list-inline">]]></search>
+			<add position="after" offset="0"><![CDATA[
+			{% if module_purpletree_multivendor_browse_sellers %}
+			<li><i class="fa fa-users" aria-hidden="true"></i> <span><a href="{{ browse_seller_link }}">{{ text_browse_sellers }}</a></span></li>
+			{% endif %}
+			]]></add>
+		</operation>
+		<operation error="skip">
+			<search><![CDATA[</head>]]></search>
+			<add position="before"><![CDATA[
+			<script src="catalog/view/javascript/purpletree/common.js" type="text/javascript"></script>	
+			]]></add>
+		</operation>
+	</file>
+	<file path="catalog/view/theme/*/template/common/header2.twig">
+		
+		<operation error="skip">
+			<search><![CDATA[<base]]></search>
+			<add offset="0" position="before"><![CDATA[
+			<script src="catalog/view/javascript/purpletree/jquery/jquery-2.1.1.min.js" type="text/javascript"></script>
+{% if direction=='rtl' %}
+<link href="catalog/view/javascript/purpletree/bootstrap/css/bootstrap.min-a.css" rel="stylesheet" media="screen" />
+<link href="catalog/view/theme/default/stylesheet/purpletree/custom-a.css" rel="stylesheet">
+{% else %}
+<link href="catalog/view/javascript/purpletree/bootstrap/css/bootstrap.min.css" rel="stylesheet" media="screen" />
+<link href="catalog/view/theme/default/stylesheet/purpletree/custom.css" rel="stylesheet">
+{% endif %}
+			]]></add>
+		</operation>
+		<operation error="skip">
+			<search><![CDATA[<ul class="list-inline">]]></search>
+			<add position="after" offset="0"><![CDATA[
+			{% if module_purpletree_multivendor_browse_sellers %}
+			<li><i class="fa fa-users" aria-hidden="true"></i> <span><a href="{{ browse_seller_link }}">{{ text_browse_sellers }}</a></span></li>
+			{% endif %}
+			]]></add>
+		</operation>
+		<operation error="skip">
+			<search><![CDATA[</head>]]></search>
+			<add position="before"><![CDATA[
+			<script src="catalog/view/javascript/purpletree/common.js" type="text/javascript"></script>	
+			]]></add>
+		</operation>
+	</file>
+	<file path="catalog/view/theme/*/template/common/header3.twig">
+		
+		<operation error="skip">
+			<search><![CDATA[<base]]></search>
+			<add offset="0" position="before"><![CDATA[
+			<script src="catalog/view/javascript/purpletree/jquery/jquery-2.1.1.min.js" type="text/javascript"></script>
+{% if direction=='rtl' %}
+<link href="catalog/view/javascript/purpletree/bootstrap/css/bootstrap.min-a.css" rel="stylesheet" media="screen" />
+<link href="catalog/view/theme/default/stylesheet/purpletree/custom-a.css" rel="stylesheet">
+{% else %}
+<link href="catalog/view/javascript/purpletree/bootstrap/css/bootstrap.min.css" rel="stylesheet" media="screen" />
+<link href="catalog/view/theme/default/stylesheet/purpletree/custom.css" rel="stylesheet">
+{% endif %}
+			]]></add>
+		</operation>
+		<operation error="skip">
+			<search><![CDATA[<ul class="list-inline">]]></search>
+			<add position="after" offset="0"><![CDATA[
+			{% if module_purpletree_multivendor_browse_sellers %}
+			<li><i class="fa fa-users" aria-hidden="true"></i> <span><a href="{{ browse_seller_link }}">{{ text_browse_sellers }}</a></span></li>
+			{% endif %}
+			]]></add>
+		</operation>
+		<operation error="skip">
+			<search><![CDATA[</head>]]></search>
+			<add position="before"><![CDATA[
+			<script src="catalog/view/javascript/purpletree/common.js" type="text/javascript"></script>	
+			]]></add>
+		</operation>
+	</file>
+	<file path="catalog/view/theme/*/template/common/header4.twig">
+		
+		<operation error="skip">
+			<search><![CDATA[<base]]></search>
+			<add offset="0" position="before"><![CDATA[
+			<script src="catalog/view/javascript/purpletree/jquery/jquery-2.1.1.min.js" type="text/javascript"></script>
+{% if direction=='rtl' %}
+<link href="catalog/view/javascript/purpletree/bootstrap/css/bootstrap.min-a.css" rel="stylesheet" media="screen" />
+<link href="catalog/view/theme/default/stylesheet/purpletree/custom-a.css" rel="stylesheet">
+{% else %}
+<link href="catalog/view/javascript/purpletree/bootstrap/css/bootstrap.min.css" rel="stylesheet" media="screen" />
+<link href="catalog/view/theme/default/stylesheet/purpletree/custom.css" rel="stylesheet">
+{% endif %}
+			]]></add>
+		</operation>
+		<operation error="skip">
+			<search><![CDATA[<ul class="list-inline">]]></search>
+			<add position="after" offset="0"><![CDATA[
+			{% if module_purpletree_multivendor_browse_sellers %}
+			<li><i class="fa fa-users" aria-hidden="true"></i> <span><a href="{{ browse_seller_link }}">{{ text_browse_sellers }}</a></span></li>
+			{% endif %}
+			]]></add>
+		</operation>
+		<operation error="skip">
+			<search><![CDATA[</head>]]></search>
+			<add position="before"><![CDATA[
+			<script src="catalog/view/javascript/purpletree/common.js" type="text/javascript"></script>	
+			]]></add>
+		</operation>
+	</file>
+	<file path="catalog/view/theme/*/template/common/footer.twig">
+		<operation error="skip">
+			<search><![CDATA[</body>]]></search>
+			<add position="before"><![CDATA[
+			<script>
+$(document).on('click','.note-insert button',function(){ 
+	$('.modal-backdrop.in').css("display","none");
+});
+$(document).on('click','.note-link button',function(){ 
+	$('.modal-backdrop.in').css("display","none");
+});
+</script>
+			]]></add>
+		</operation>
+	</file>
+
+	<file path="catalog/view/theme/*/template/common/footer1.twig">
+		<operation error="skip">
+			<search><![CDATA[</body>]]></search>
+			<add position="before"><![CDATA[
+			<script>
+$(document).on('click','.note-insert button',function(){ 
+	$('.modal-backdrop.in').css("display","none");
+});
+$(document).on('click','.note-link button',function(){ 
+	$('.modal-backdrop.in').css("display","none");
+});
+</script>
+			]]></add>
+		</operation>
+	</file>
+	<file path="catalog/view/theme/*/template/common/footer2.twig">
+	
+		<operation error="skip">
+			<search><![CDATA[</body>]]></search>
+			<add position="before"><![CDATA[
+			<script>
+$(document).on('click','.note-insert button',function(){ 
+	$('.modal-backdrop.in').css("display","none");
+});
+$(document).on('click','.note-link button',function(){ 
+	$('.modal-backdrop.in').css("display","none");
+});
+</script>
+			]]></add>
+		</operation>
+	</file>
+	<file path="catalog/view/theme/*/template/common/footer3.twig">
+		<operation error="skip">
+			<search><![CDATA[</body>]]></search>
+			<add position="before"><![CDATA[
+			<script>
+$(document).on('click','.note-insert button',function(){ 
+	$('.modal-backdrop.in').css("display","none");
+});
+$(document).on('click','.note-link button',function(){ 
+	$('.modal-backdrop.in').css("display","none");
+});
+</script>
+			]]></add>
+		</operation>
+	</file>
+	<file path="catalog/view/theme/*/template/common/footer4.twig">
+		<operation error="skip">
+			<search><![CDATA[</body>]]></search>
+			<add position="before"><![CDATA[
+			<script>
+$(document).on('click','.note-insert button',function(){ 
+	$('.modal-backdrop.in').css("display","none");
+});
+$(document).on('click','.note-link button',function(){ 
+	$('.modal-backdrop.in').css("display","none");
+});
+</script>
+			]]></add>
+		</operation>
+	</file>
+	<file path="catalog/view/theme/*/template/common/footer5.twig">
+		<operation error="skip">
+			<search><![CDATA[</body>]]></search>
+			<add position="before"><![CDATA[
+			<script>
+$(document).on('click','.note-insert button',function(){ 
+	$('.modal-backdrop.in').css("display","none");
+});
+$(document).on('click','.note-link button',function(){ 
+	$('.modal-backdrop.in').css("display","none");
+});
+</script>
+			]]></add>
+		</operation>
+	</file>
+	<file path="catalog/view/theme/*/template/common/footer6.twig">
+		<operation error="skip">
+			<search><![CDATA[</body>]]></search>
+			<add position="before"><![CDATA[
+			<script>
+$(document).on('click','.note-insert button',function(){ 
+	$('.modal-backdrop.in').css("display","none");
+});
+$(document).on('click','.note-link button',function(){ 
+	$('.modal-backdrop.in').css("display","none");
+});
+</script>
+			]]></add>
+		</operation>
+	</file>
+	<file path="catalog/view/theme/*/template/account/order_info.twig">
+		<operation error="skip">
+			<search><![CDATA[<td class="text-left">{{ history.comment }}</td>]]></search>
+			<add position="after"><![CDATA[
+			<td class="text-left">{{ history.updated_by }}</td>
+			]]></add>
+		</operation>
+		<operation error="skip">
+			<search><![CDATA[<td class="text-left">{{ column_comment }}</td>]]></search>
+			<add position="after"><![CDATA[
+			<td class="text-left">{{ column_updated_by }}</td>
+			]]></add>
+		</operation>
+		<operation error="skip">
+			<search><![CDATA[<td class="text-left">{{ column_date_added }}</td>]]></search>
+			<add position="before"><![CDATA[
+			<td class="text-left">{{ column_name }}</td>
+			]]></add>
+		</operation>
+		<operation error="skip">
+			<search><![CDATA[<td class="text-left">{{ history.date_added }}</td>]]></search>
+			<add position="before"><![CDATA[
+			<td class="text-left">
+				<table>
+					{% for product in history.product_name %}
+						<tr>
+							<td class="purpleproductname">{{ product.product_name }}</td>
+						</tr>
+					{% endfor %}
+				</table>
+			</td>
+			]]></add>
+		</operation>
+	</file>
+	<file path="catalog/view/theme/*/template/account/order_list.twig">
+		<operation error="skip">
+			<search><![CDATA[<td class="text-left">{{ order.status }}</td>]]></search>
+			<add position="replace" offset="0"><![CDATA[
+			<td class="text-left pts-table_order_list" style="padding: 0px;">
+				<table style="width: 100%;">
+					{% for status in order.status %}
+					<tr>
+						<td class="purpleproductname" style="padding: 5px;">
+							<table>
+								{% for product in status.product %}
+									<tr>
+										<td>{{ product.product_name }}</td>
+									</tr>
+								{% endfor %}
+							</table>
+						</td>
+							<td class="purplstatus" style="text-align:right;padding:11px;">{{ status.order_status }}</td>
+					</tr>
+				  {% endfor %}
+				</table>
+			  </td>
+			]]></add>
+		</operation>
+	</file>
+	<file path="admin/controller/sale/order.php">
+	<operation error="skip">
+			<search><![CDATA[foreach ($orders as $order_id) {]]></search>
+			<add position="before" offset="1"><![CDATA[
+			if ($this->config->get('module_purpletree_multivendor_status')) {	
+			$this->load->model('extension/purpletree_multivendor/orderinvoice');
+		}
+	]]></add>
+		</operation>
+		<operation error="skip">
+			<search><![CDATA[$total_data = array();]]></search>
+			<add position="before" offset="1"><![CDATA[
+			$sellerorderArray = array();
+			$allprodcus = array();
+			$sellerorders = array();
+			if ($this->config->get('module_purpletree_multivendor_status')) {	
+				$this->load->model('extension/purpletree_multivendor/orderinvoice');
+				//print_r($products);
+				$seller_order_info = $this->model_extension_purpletree_multivendor_orderinvoice->getsellerorder($order_id);
+				$productsaa = $this->model_sale_order->getOrderProducts($order_id);
+					if(!empty($seller_order_info)) {
+						 foreach($seller_order_info as $sellerorder) {
+							 $sellerorderArray[$sellerorder['seller_id']][$sellerorder['id']] = $sellerorder;
+							 $allprodcus[] = $sellerorder['product_id'];
+						 }
+					
+						 foreach($productsaa as $pro) {
+							 if(!in_array($pro['product_id'],$allprodcus)) {
+								$sellerorderArray[0][$pro['order_product_id']] = $pro; 
+							 }
+						 }
+					} else {
+						$total_data = array();
+
+				$totals = $this->model_sale_order->getOrderTotals($order_id);
+
+				foreach ($totals as $total) {
+					$total_data[] = array(
+						'title' => $total['title'],
+						'text'  => $this->currency->format($total['value'], $order_info['currency_code'], $order_info['currency_value'])
+					);
+				}
+					$data['orders'][] = array(
+					'order_id'	       => $order_id,
+					'invoice_no'       => $invoice_no,
+					'date_added'       => date($this->language->get('date_format_short'), strtotime($order_info['date_added'])),
+					'store_name'       => $order_info['store_name'],
+					'store_url'        => rtrim($order_info['store_url'], '/'),
+					'store_address'    => nl2br($store_address),
+					'store_email'      => $store_email,
+					'store_telephone'  => $store_telephone,
+					'store_fax'        => $store_fax,
+					'email'            => $order_info['email'],
+					'telephone'        => $order_info['telephone'],
+					//'shipping_address' => $shipping_address,
+					//'shipping_method'  => $order_info['shipping_method'],
+					'payment_address'  => $payment_address,
+					'payment_method'   => $order_info['payment_method'],
+					'product'          => $product_data,
+					'voucher'          => $voucher_data,
+					'total'            => $total_data,
+					'comment'          => nl2br($order_info['comment'])
+				);
+				$this->response->setOutput($this->load->view('sale/order_invoice', $data));
+					}
+					
+				if(!empty($sellerorderArray)) {
+					foreach($sellerorderArray as $sellerid => $sellerorders) {
+						if($sellerid == 0) {
+							$store_info = $this->model_setting_setting->getSetting('config', $order_info['store_id']);
+							if ($store_info) {
+								$store_address = $store_info['config_address'];
+								$store_email = $store_info['config_email'];
+								$store_telephone = $store_info['config_telephone'];
+								$store_fax = $store_info['config_fax'];
+							} else {
+								$store_address = $this->config->get('config_address');
+								$store_email = $this->config->get('config_email');
+								$store_telephone = $this->config->get('config_telephone');
+								$store_fax = $this->config->get('config_fax');
+							}
+						} else  {
+						$seller_store = $this->model_extension_purpletree_multivendor_orderinvoice->getStoreDetail($sellerid);
+						$order_info['store_name'] = $seller_store['store_name'];
+						$store_address = $seller_store['store_address'];
+						$store_email = $seller_store['store_email'];
+						$store_telephone = $seller_store['store_phone'];
+						$store_fax = '';
+						}
+						$product_data = array();
+						$totalsub = 0;
+					$totalpro = 0;
+						foreach($sellerorders as $sellerord) {
+							// products data
+					$option_data = array();
+					$product = $this->model_extension_purpletree_multivendor_orderinvoice->getOrderProducts($order_id, $sellerord['product_id']);
+					$options = $this->model_sale_order->getOrderOptions($order_id, $product['order_product_id']);
+					foreach ($options as $option) {
+						if ($option['type'] != 'file') {
+							$value = $option['value'];
+						} else {
+							$upload_info = $this->model_tool_upload->getUploadByCode($option['value']);
+
+							if ($upload_info) {
+								$value = $upload_info['name'];
+							} else {
+								$value = '';
+							}
+						}
+
+						$option_data[] = array(
+							'name'  => $option['name'],
+							'value' => $value
+						);
+					}
+
+					$product_data[] = array(
+						'name'     => $product['name'],
+						'model'    => $product['model'],
+						'option'   => $option_data,
+						'quantity' => $product['quantity'],
+						'price'    => $this->currency->format($product['price'] + ($this->config->get('config_tax') ? $product['tax'] : 0), $order_info['currency_code'], $order_info['currency_value']),
+						'total'    => $this->currency->format($product['total'] + ($this->config->get('config_tax') ? ($product['tax'] * $product['quantity']) : 0), $order_info['currency_code'], $order_info['currency_value'])
+						);
+						$totalsub += $product['total'] + ($this->config->get('config_tax') ? ($product['tax'] * $product['quantity']) : 0);
+							// products data
+						}
+					$total_data = array();
+						if($sellerid == 0) {
+							$totals = $this->model_sale_order->getOrderTotals($order_id);
+						} else {
+					$totals = $this->model_extension_purpletree_multivendor_orderinvoice->getOrderTotals($order_id,$sellerid);
+						}
+						$totall =0;
+				foreach ($totals as $total) {
+						if($sellerid == 0) {
+							if($total['code'] == 'sub_total') {
+								$total_data[] = array(
+									'title' => $total['title'],
+									'text'  => $this->currency->format($totalsub, $order_info['currency_code'], $order_info['currency_value'])
+								);
+								$totall += $totalsub;
+								continue;
+							}
+							if($total['code'] == 'total') {
+								$total_data[] = array(
+									'title' => $total['title'],
+									'text'  => $this->currency->format($totall, $order_info['currency_code'], $order_info['currency_value'])
+								);
+								continue;
+							}
+						}
+					$total_data[] = array(
+						'title' => $total['title'],
+						'text'  => $this->currency->format($total['value'], $order_info['currency_code'], $order_info['currency_value'])
+					);
+					$totall += $total['value'];
+					
+				}
+				if($invoice_no != "") {
+					$invoice_no .= "-".$sellerid;
+				}
+						$data['orders'][] = array(
+					'order_id'	       => $order_id.'-'.$sellerid,
+					'invoice_no'       => $invoice_no,
+					'date_added'       => date($this->language->get('date_format_short'), strtotime($order_info['date_added'])),
+					'store_name'       => $order_info['store_name'],
+					'store_url'        => rtrim($order_info['store_url'], '/'),
+					'store_address'    => nl2br($store_address),
+					'store_email'      => $store_email,
+					'store_telephone'  => $store_telephone,
+					'store_fax'        => $store_fax,
+					'email'            => $order_info['email'],
+					'telephone'        => $order_info['telephone'],
+					//'shipping_address' => $shipping_address,
+					//'shipping_method'  => $order_info['shipping_method'],
+					'payment_address'  => $payment_address,
+					'payment_method'   => $order_info['payment_method'],
+					'product'          => $product_data,
+					'voucher'          => $voucher_data,
+					'total'            => $total_data,
+					'comment'          => nl2br($order_info['comment'])
+				);
+				$this->response->setOutput($this->load->view('sale/order_invoice', $data));
+					}
+				// Seller order
+				}
+			} else {
+	]]></add>
+		</operation>
+		<operation error="skip">
+			<search><![CDATA[public function shipping() {]]></search>
+			<add position="before" offset="1"><![CDATA[
+			}
+			]]></add>
+		</operation>
+		
+	</file>
+	<file path="catalog/controller/account/order.php">
+		<operation error="skip">
+			<search><![CDATA[$data['histories'][] = array(]]></search>
+			<add position="replace" offset="1"><![CDATA[
+			$product22[0]['product_name'] = "All"; 
+			$data['histories'][] = array(
+					'date_added' => date($this->language->get('date_format_short'), strtotime($result['date_added'])),
+					'product_name' => $product22,
+					'updated_by' => "Admin",
+			]]></add>
+		</operation>
+		<operation error="skip">
+			<search><![CDATA[$data['continue'] = $this->url->link('account/order', '', true);]]></search>
+			<add position="before"><![CDATA[
+			 usort($data['histories'], function($a, $b) {
+			  return ($a['date_added'] < $b['date_added']) ? -1 : 1;
+			});
+			]]></add>
+		</operation>
+			<operation error="skip">
+			<search><![CDATA[$this->model_account_order->getOrderHistories($this->request->get['order_id']);]]></search>
+			<add position="after"><![CDATA[
+				$data['column_updated_by'] = "Updated By";
+			$resultssellers = 
+			$this->model_account_order->getSellerOrderHistories($this->request->get['order_id']);
+			foreach ($resultssellers as $result1) {
+			$data['histories'][] = array(
+					'date_added' => date($this->language->get('date_format_short'), strtotime($result1['created_at'])),
+					'product_name' => $this->model_account_order->getSellerOrderProducts($result1['order_id'],$result1['seller_id']),
+					'status'     => $result1['status'],
+					'comment'    => $result1['notify'] ? nl2br($result1['comment']) : '',
+					'updated_by' => $this->model_account_order->getStoreName($result1['seller_id'])
+				);
+			}
+			]]></add>
+		</operation>
+		<operation error="skip">
+			<search><![CDATA['name'       => $result['firstname'] . ' ' . $result['lastname'],]]></search>
+			<add position="replace" offset="1"><![CDATA[
+			'name'       => $result['firstname'] . ' ' . $result['lastname'],
+			'status'     => $this->model_account_order->getUniqueSeller($result['order_id']),
+			]]></add>
+		</operation>
+	</file>
+	<file path="catalog/model/account/order.php">
+		<operation error="skip">
+			<search><![CDATA[getOrderHistories]]></search>
+			<add position="before"><![CDATA[
+						public function getSellerOrderHistories($order_id) {
+		$query = $this->db->query("SELECT pvh.order_id, pvh.seller_id, pvh.created_at, os.name AS status, pvh.comment, pvh.notify FROM " . DB_PREFIX . "purpletree_vendor_orders_history pvh LEFT JOIN " . DB_PREFIX . "order_status os ON pvh.order_status_id = os.order_status_id WHERE pvh.order_id = '" . (int)$order_id . "' AND os.language_id = '" . (int)$this->config->get('config_language_id') . "' ORDER BY pvh.id DESC");
+		return $query->rows;
+	}
+	
+	public function getUniqueSeller($order_id){
+		$query = $this->db->query("SELECT DISTINCT(seller_id) FROM " . DB_PREFIX . "purpletree_vendor_orders_history WHERE order_id='".(int)$order_id."' order by id desc");
+		$result = $query->rows;
+		$aa = array();
+		$aa = $this->getSellerOrderStatus($result, $order_id);
+		$dd = array();
+		if(!empty($aa)) {
+			foreach($aa as $bb) {
+			foreach($bb['product'] as $cc) {
+				$dd[] = $cc['product_id'];
+			}
+		}
+		}
+		
+		$query11 = $this->db->query("SELECT '0' AS seller_id,op.product_id,op.name as product_name, os.name AS status FROM " . DB_PREFIX . "order_product op LEFT JOIN " . DB_PREFIX . "order o ON o.order_id = op.order_id LEFT JOIN " . DB_PREFIX . "order_status os ON o.order_status_id = os.order_status_id WHERE op.order_id='" . $order_id . "' GROUP BY op.order_product_id");
+		$resul11t = $query11->rows;
+			$fdfd = array();
+		foreach($resul11t as $ree) {
+			if(!empty($aa)) {
+				if(!in_array($ree['product_id'],$dd)) {
+		$fdfd[$ree['product_id']]['product_name'] = $ree['product_name'];
+					foreach($aa as $gg) {
+						$aa[0] = array("order_status" =>  $ree['status'],
+										"product" => $fdfd
+						);
+					}
+				}
+			} else {
+		$fdfd[$ree['product_id']]['product_name'] = $ree['product_name'];
+				$aa[0] = array("order_status" =>  $ree['status'],
+								"seller_id" => '0',
+										"product" => $fdfd
+						);
+			}
+		}
+		return $aa;
+	}
+	
+	public function getSellerOrderStatus($result, $order_id){
+		$order_status = array();
+		foreach($result as $result){
+			$query = $this->db->query("SELECT pvh.order_id, pvh.seller_id, pvh.created_at, os.name AS status FROM " . DB_PREFIX . "purpletree_vendor_orders_history pvh LEFT JOIN " . DB_PREFIX . "order_status os ON pvh.order_status_id = os.order_status_id WHERE pvh.seller_id='".(int)$result['seller_id']."' AND pvh.order_id='".(int)$order_id."' AND os.language_id = '" . (int)$this->config->get('config_language_id') . "' ORDER BY pvh.id DESC limit 1");
+			$result1 = $query->row;
+			$order_status[$result['seller_id']] = array(
+				'order_status' => $result1['status'],
+				'seller_id' => $result['seller_id'],
+				'product' => $this->getSellerOrderProducts($order_id, $result['seller_id'])
+			);
+		}
+	
+		return $order_status;
+	}
+	
+	public function getSellerOrderProducts($order_id, $seller_id){
+		$query = $this->db->query("SELECT pvo.product_id,(SELECT op.name FROM " . DB_PREFIX . "order_product op where op.product_id = pvo.product_id AND op.order_id = pvo.order_id) as product_name FROM " . DB_PREFIX . "purpletree_vendor_orders pvo WHERE pvo.seller_id='".(int)$seller_id."' AND pvo.order_id = '".(int)$order_id."'");
+    
+		return $query->rows;
+	}
+		public function getStoreName($seller_id) {
+		$query = $this->db->query("SELECT store_name FROM " . DB_PREFIX . "purpletree_vendor_stores WHERE seller_id = " . (int)$seller_id );
+
+		if ($query->num_rows > 0) {
+			return $query->row['store_name'];
+		} else {
+			return null;	
+		}
+		
+	}	
+			]]></add>
+		</operation>
+	</file>
+	<file path="catalog/controller/mail/order.php">
+		<operation error="skip">
+			<search><![CDATA[$emails = explode(',', $this->config->get('config_mail_alert_email'));]]></search>
+			<add position="before"><![CDATA[
+			// Seller mail
+			$this->load->model('extension/purpletree_multivendor/sellerorder');
+			$order_seller = $this->model_extension_purpletree_multivendor_sellerorder->getOrderSeller($order_id);
+			
+			if($order_seller){
+				foreach($order_seller as $orderseller){
+					
+					$this->load->language('mail/order_alert');
+					$seller_detail = $this->db->query("SELECT email FROM " .DB_PREFIX."customer WHERE customer_id = '".$orderseller['seller_id']."'")->row;
+					// HTML Mail
+					$data['text_received'] = $this->language->get('text_received');
+					$data['text_order_id'] = $this->language->get('text_order_id');
+					$data['text_date_added'] = $this->language->get('text_date_added');
+					$data['text_order_status'] = $this->language->get('text_order_status');
+					$data['text_product'] = $this->language->get('text_product');
+					$data['text_total'] = $this->language->get('text_total');
+					$data['text_comment'] = $this->language->get('text_comment');
+					
+					$data['order_id'] = $order_info['order_id'];
+					$data['date_added'] = date($this->language->get('date_format_short'), strtotime($order_info['date_added']));
+
+					$order_status_query = $this->db->query("SELECT * FROM " . DB_PREFIX . "order_status WHERE order_status_id = '" . (int)$order_status_id . "' AND language_id = '" . (int)$this->config->get('config_language_id') . "'");
+
+					if ($order_status_query->num_rows) {
+						$data['order_status'] = $order_status_query->row['name'];
+					} else {
+						$data['order_status'] = '';
+					}
+
+					$this->load->model('tool/upload');
+					
+					$data['products'] = array();
+
+					$order_products = $this->model_extension_purpletree_multivendor_sellerorder->getSellerOrderProducts($order_id, $orderseller['seller_id']);
+
+					foreach ($order_products as $order_product) {
+						$option_data = array();
+						
+						$order_options = $this->model_extension_purpletree_multivendor_sellerorder->getOrderOptions($order_info['order_id'], $order_product['order_product_id']);
+						
+						foreach ($order_options as $order_option) {
+							if ($order_option['type'] != 'file') {
+								$value = $order_option['value'];
+							} else {
+								$upload_info = $this->model_tool_upload->getUploadByCode($order_option['value']);
+			
+								if ($upload_info) {
+									$value = $upload_info['name'];
+								} else {
+									$value = '';
+								}
+							}
+
+							$option_data[] = array(
+								'name'  => $order_option['name'],
+								'value' => (utf8_strlen($value) > 20 ? utf8_substr($value, 0, 20) . '..' : $value)
+							);					
+						}
+							
+						$data['products'][] = array(
+							'name'     => $order_product['name'],
+							'model'    => $order_product['model'],
+							'quantity' => $order_product['quantity'],
+							'option'   => $option_data,
+							'total'    => html_entity_decode($this->currency->format($order_product['total'] + ($this->config->get('config_tax') ? ($order_product['tax'] * $order_product['quantity']) : 0), $order_info['currency_code'], $order_info['currency_value']), ENT_NOQUOTES, 'UTF-8')
+						);
+					}
+					
+					$data['vouchers'] = array();
+					
+					$order_vouchers = $this->model_extension_purpletree_multivendor_sellerorder->getOrderVouchers($order_id);
+
+					foreach ($order_vouchers as $order_voucher) {
+						$data['vouchers'][] = array(
+							'description' => $order_voucher['description'],
+							'amount'      => html_entity_decode($this->currency->format($order_voucher['amount'], $order_info['currency_code'], $order_info['currency_value']), ENT_NOQUOTES, 'UTF-8')
+						);					
+					}
+
+					$data['totals'] = array();
+					
+					$order_totals = $this->model_extension_purpletree_multivendor_sellerorder->getOrderTotals($order_id, $orderseller['seller_id']);
+
+					foreach ($order_totals as $order_total) {
+						$data['totals'][] = array(
+							'title' => $order_total['title'],
+							'value' => html_entity_decode($this->currency->format($order_total['value'], $order_info['currency_code'], $order_info['currency_value']), ENT_NOQUOTES, 'UTF-8')
+						);
+					}
+
+					$data['comment'] = strip_tags($order_info['comment']);
+
+					$mail = new Mail($this->config->get('config_mail_engine'));
+					$mail->parameter = $this->config->get('config_mail_parameter');
+					$mail->smtp_hostname = $this->config->get('config_mail_smtp_hostname');
+					$mail->smtp_username = $this->config->get('config_mail_smtp_username');
+					$mail->smtp_password = html_entity_decode($this->config->get('config_mail_smtp_password'), ENT_QUOTES, 'UTF-8');
+					$mail->smtp_port = $this->config->get('config_mail_smtp_port');
+					$mail->smtp_timeout = $this->config->get('config_mail_smtp_timeout');
+
+					$mail->setTo($seller_detail['email']);
+					
+					$mail->setFrom($this->config->get('config_email'));
+					$mail->setSender(html_entity_decode($order_info['store_name'], ENT_QUOTES, 'UTF-8'));
+					$mail->setSubject(html_entity_decode(sprintf($this->language->get('text_subject'), $this->config->get('config_name'), $order_info['order_id']), ENT_QUOTES, 'UTF-8'));
+					$mail->setText($this->load->view('mail/order_alert', $data));
+					$mail->send();	
+				}
+			}
+			]]></add>
+		</operation>
+	</file>
+		<file path="catalog/controller/product/category.php">
+		<operation error="skip">
+			<search><![CDATA[ $results = $this->model_catalog_product->getProducts($filter_data); ]]></search>
+			<add position="after"><![CDATA[ $resultsid = array(); ]]></add>
+	    </operation>
+	    <operation error="skip">
+			<search><![CDATA[ public function index() { ]]></search>
+			<add position="after"> <![CDATA[$this->document->addStyle('catalog/view/javascript/purpletree/jquery/owl-carousel/owl.carousel.css');	        $this->document->addScript('catalog/view/javascript/purpletree/jquery/owl-carousel/owl.carousel.min.js');  ]]></add>
+			
+	</operation>
+	<operation error="skip">
+			<search><![CDATA[ public function index() { ]]></search>
+			<add position="after"><![CDATA[ $resultsid = array(); ]]></add>
+	</operation>
+	
+	<operation error="skip">
+			<search><![CDATA[ $data['products'][] = array( ]]></search>
+			<add position="before"><![CDATA[ $resultsid[] = $result['product_id']; ]]></add>
+	</operation>
+	
+	<operation error="skip">
+			<search><![CDATA[ $this->response->setOutput($this->load->view('product/category', $data)); ]]></search>
+			<add position="before"><![CDATA[ //  Start Seller category featured  products
+			$this->load->language('account/ptsregister');
+     $data['text_seller_featured_products'] = $this->language->get('text_seller_featured_products');
+		
+		$data['text_tax'] = $this->language->get('text_tax');
+
+		$data['button_cart'] = $this->language->get('button_cart');
+		$data['button_wishlist'] = $this->language->get('button_wishlist');
+		$data['button_compare'] = $this->language->get('button_compare');
+
+		$this->load->model('catalog/product');
+		$this->load->model('catalog/product');
+
+		$this->load->model('tool/image');
+
+		$data['productss'] = array();			
+
+		
+//  End Seller category featured  products ]]></add>
+	</operation>
+	
+	</file>
+
+   	<file path="catalog/controller/journal3/layout.php">
+		<operation error="skip">
+			<search><![CDATA[if ($data['modules']) {]]></search>
+			<add position="before"><![CDATA[
+			$modules = $this->model_design_layout->getLayoutModules($layout_id, $POSITION);
+
+				$this->load->model('setting/module');
+
+				foreach ($modules as $module) {
+					$part = explode('.', $module['code']);
+
+					if (isset($part[0]) && $this->config->get('module_' . $part[0] . '_status')) {
+						$module_data = $this->load->controller('extension/module/' . $part[0]);
+
+						if ($module_data) {
+							$data['modules'][] = $module_data;
+						}
+					}
+
+					if (isset($part[1])) {
+						$setting_info = $this->model_setting_module->getModule($part[1]);
+
+					if ($setting_info && $setting_info['status']) {
+							$output = $this->load->controller('extension/module/' . $part[0], $setting_info);
+
+							if ($output) {
+								$data['modules'][] = $output;
+							}
+						}
+					}
+				}
+			]]></add>
+			</operation>
+	</file>
+		<file path="catalog/view/theme/journal3/template/account/order_list.twig">
+		<operation error="skip">
+			<search><![CDATA[<td class="text-center">{{ order.status }}</td>]]></search>
+			<add position="replace" offset="0"><![CDATA[
+			<td class="text-left pts-table_order_list" style="padding: 0px;">
+				<table style="width: 100%;">
+					{% for status in order.status %}
+					<tr>
+						<td class="purpleproductname" style="padding: 5px;">
+							<table>
+								{% for product in status.product %}
+									<tr>
+										<td>{{ product.product_name }}</td>
+									</tr>
+								{% endfor %}
+							</table>
+						</td>
+							<td class="purplstatus" style="text-align:right;padding:11px;">{{ status.order_status }}</td>
+					</tr>
+				  {% endfor %}
+				</table>
+			  </td>
+			]]></add>
+		</operation>
+	</file>
+	<file path="catalog/view/theme/journal3/template/product/product.twig">
+		<operation error="skip">
+			<search><![CDATA[{% if price and not j3.document.isPopup('options') %}]]></search>
+			<add position="before"><![CDATA[{% if seller_detail %}
+				<li>{{ text_seller_label }} <a href="{{ seller_detail.seller_href }}">{{ seller_detail.seller_name }}</a></li>
+				{% if seller_review_status %}
+				<li>{% if seller_detail.seller_rating %}
+				<div class="rating">
+							{{ text_seller_rating }}&nbsp;&nbsp;&nbsp;
+							  {% for i in 1..5 %}
+							  {% if seller_detail.seller_rating < i %}
+							  <span class="fa fa-stack" style="min-width:0;"><i class="fa fa-star-o fa-stack-1x"></i></span>
+							  {% else %}
+							  <span class="fa fa-stack" style="min-width:0;"><i class="fa fa-star fa-stack-1x"></i></span>
+							 {% endif %}
+							  {% endfor %}
+							  <a href="{{ seller_detail.seller_review_link }}">{{ seller_detail.seller_count }} {{ text_seller_review }}</a>
+							</div>
+							{% else %}
+							<div class="rating">{{ text_seller_rating }}&nbsp;&nbsp;&nbsp;
+								{% for i in 1..5 %}
+									<span class="fa fa-stack" style="min-width:0;"><i class="fa fa-star-o fa-stack-1x"></i></span>
+								{% endfor %}
+								<a href="{{ seller_detail.seller_review_link }}">{{ seller_detail.seller_count }} {{ text_seller_review }}</a>
+							</div>
+							{% endif %}</li>
+				{% endif %}
+					<li><a href="{{ seller_detail.seller_contact_link }}">{{ text_seller_contact }}</a></li>
+			{% endif %}]]></add>
+		</operation>
+	</file>
+</modification>

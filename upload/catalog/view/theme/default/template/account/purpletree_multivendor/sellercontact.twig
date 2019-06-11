@@ -1,0 +1,74 @@
+{{ header }}
+<div class="pts-container">
+  <ul class="pts-breadcrumb">
+    {% for breadcrumb in breadcrumbs %}
+		<li><a href="{{ breadcrumb.href }}">{{ breadcrumb.text }}</a></li>
+	{% endfor %}
+  </ul>
+  {% if success %}
+  <div class="alert alert-success"><i class="fa fa-check-circle"></i> {{ success }}</div>
+  {% endif %}
+  {% if error_warning %}
+  <div class="alert alert-warning"><i class="fa fa-exclamation-circle"></i> {{ error_warning }}</div>
+  {% endif %}
+  <div class="pts-row">{{ column_left }}
+		{% if column_left and column_right %}
+		{% set class = 'pts-col-sm-6' %}
+		{% elseif column_left or column_right %}
+		{% set class = 'pts-col-sm-9' %}
+		{% else %}
+		{% set class = 'pts-col-sm-12' %}
+		{% endif %}
+		<div id="pts-content" class="{{ class }}">{{ content_top }}
+      <h1>{{ heading_title }}</h1>
+      <form action="{{ action }}" method="post" enctype="multipart/form-data" class="pts-form-horizontal">
+	  <input type="hidden" name="seller_id" value="{{ seller_id }}">
+	  <input type="hidden" name="customer_id" value="{{ customer_id }}">
+	  <input type="hidden" name="contact_from" value="0">
+        <fieldset>
+		{% if contact_Mode %}
+		<input type="hidden" name="customer_name" value="{{ customer_name }}">
+		<input type="hidden" name="customer_email" value="{{ customer_email }}">
+		{% endif %}
+		{% if not contact_Mode %}
+          <div class="pts-form-group required">
+            <label class="pts-col-sm-2 pts-control-label" for="input-name">{{ entry_name }}</label>
+            <div class="pts-col-sm-10">
+              <input type="text" name="customer_name" value="{{ customer_name }}" id="input-name" class="pts-form-control" />
+				{% if error_name %}
+              <div class="text-danger">{{ error_name }}</div>
+              {% endif %}
+            </div>
+          </div>
+          <div class="pts-form-group required">
+            <label class="pts-col-sm-2 pts-control-label" for="input-email">{{ entry_email }}</label>
+            <div class="pts-col-sm-10">
+              <input type="text" name="customer_email" value="{{ customer_email }}" id="input-email" class="pts-form-control" />
+				{% if error_email %}
+              <div class="text-danger">{{ error_email }}</div>
+              {% endif %}
+            </div>
+          </div>
+		  
+		  {% endif %}
+          <div class="pts-form-group required">
+            <label class="pts-col-sm-2 pts-control-label" for="input-enquiry">{{ entry_enquiry }}</label>
+            <div class="pts-col-sm-10">
+              <textarea name="customer_message" rows="10" id="input-enquiry" class="pts-form-control">{{ customer_message }}</textarea>
+				{% if error_enquiry %}
+              <div class="text-danger">{{ error_enquiry }}</div>
+              {% endif %}
+            </div>
+          </div>
+          {{ captcha }}
+        </fieldset>
+        <div class="pts-buttons">
+          <div class="pts-pull-right">
+            <input class="pts-btn pts-btn-primary" type="submit" value="{{ button_submit }}" />
+          </div>
+        </div>
+      </form>
+      {{ content_bottom }}</div>
+		{{ column_right }}</div>
+</div>
+{{ footer }}

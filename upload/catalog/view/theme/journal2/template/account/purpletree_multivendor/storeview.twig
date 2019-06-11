@@ -1,0 +1,222 @@
+{{ header }}
+<div class="pts-container">
+	<ul class="breadcrumb">
+		{% for breadcrumb in breadcrumbs %}
+		<li><a href="{{ breadcrumb.href }}">{{ breadcrumb.text }}</a></li>
+		{% endfor %}
+	</ul>
+		{% if error_warning %}
+  <div class="alert alert-danger"><i class="fa fa-exclamation-circle"></i> {{ error_warning }}</div>
+	{% endif %}
+	<div class="row">
+		<div id="content" class="col-sm-12 {{ class }}"  style="background-color: rgb(238, 238, 238);">
+				 <h1 class="heading-title">{{ store_name }}</h1>
+		{{ content_top }}
+			
+				<div class="row">
+					<div class="store_top_div clearfix " style="margin-left:0">
+						<div class="pts-col-sm-3 seller_pannel_store">
+							<div class="store_logo pts-text-center">
+								<img class="img-responsive  m-auto" src="{{ store_logo }}">
+							</div>
+							<div class="seller-name">
+								<h3 style="margin-top:10px;">{{ seller_name }}</h3>
+							</div>
+							{% if seller_review_status %}
+							{% if store_rating.rating %}
+							<div class="rating pts-text-left">
+							  {% for i in 1..5 %}
+							  {% if store_rating.rating < i %} <span class="fa fa-stack"><i class="fa fa-star-o fa-stack-2x"></i></span> {% else %} <span class="fa fa-stack"><i class="fa fa-star fa-stack-2x"></i><i class="fa fa-star-o fa-stack-2x"></i></span> {% endif %}
+							  {% endfor %}({{ store_rating.rating|number_format(1) }})
+							</div>
+							{% else %}
+								{% for i in 1..5 %}
+									<span class="fa fa-stack"><i class="fa fa-star-o fa-stack-1x"></i></span>
+								{% endfor %}({{ store_rating.rating|number_format(1) }})
+							{% endif %}
+							<div class="store-rating">
+								<a href="{{ store_review }}" target="_blank">{{ text_sellerreview }} ({{ store_rating['count'] }})</a>
+							</div>
+							{% endif %}
+							
+							<div class="seller-info" style="">
+								<div class="contact-info">
+								{% if (module_purpletree_multivendor_store_email) is not null %}
+									<div class="seller-email">
+										<i class="fa fa-envelope" aria-hidden="true"></i> {{ store_email }}
+									</div>
+								{% endif %}
+								{% if (module_purpletree_multivendor_store_phone) is not null %}
+									<div class="seller-phone">
+										<i class="fa fa-phone" aria-hidden="true"></i> {{ store_phone }}
+									</div>
+								{% endif %}
+								{% if (module_purpletree_multivendor_store_address) is not null %}
+									<div class="seller-address">
+										<i class="fa fa-home" aria-hidden="true"></i> {{ store_address }}
+									</div>
+								{% endif %}
+								</div>
+								<div class="seller-return">
+									<div>
+										<a href="{{ store_return_policy }}" target="_blank">{{ text_returnpolicy }}
+											<i class="fa fa-angle-right pts-r"></i>
+										</a>
+									</div>
+								</div>
+								<div class="seller-shipping">
+									<div>
+										<a href="{{ store_shipping_policy }}" target="_blank">{{ text_shippingpolicy }}
+											<i class="fa fa-angle-right pts-r"></i>
+										</a>
+									</div>
+								</div>
+								<div class="seller-about">
+									<div>
+										<a href="{{ store_about }}" target="_blank">{{ text_aboutstore }}
+											<i class="fa fa-angle-right pts-r"></i>
+										</a>
+									</div>
+								</div>
+								
+							</div>
+							<div class="seller-return pts-text-center" style="text-align:center">
+								<div class=" contact_seller_link">
+									<a href="{{ seller_contact }}" class="contact_seller" target="_blank">
+									<img src="image/catalog/contact_seller.png" width="20px" height="20px" style="color:#fff"> {{ text_sellercontact }}</a>
+								</div>
+							</div>
+							<div class="seller-name">
+								<h3>{{products_categories}}</h3>
+							</div>
+							<div class="pts-list-group" >
+							{% if categories %}
+								
+								{%for category in categories %}
+								 <a href="{{category['href']}}" class="pts-list-group-item {{category['active']}}">{{ category['name'] }}</a>
+									{% if category.subcategories %}
+										{%for subcat in category.subcategories %}
+											<a href="{{subcat['href']}}" class="pts-list-group-item {{subcat['active']}}"><span>&nbsp;&nbsp;-&nbsp;</span>{{ subcat['name'] }}</a>
+										{% endfor %}
+									{% endif %}
+								{% endfor %}
+							{% endif %}
+							</div>
+						</div>
+					<div class="pts-col-sm-9">
+						<div class="pts-banner">
+							<img class="img-responsive" src="{{ store_banner }}">
+						</div>
+							
+					{% if seller_products %}
+					<div class="product-filter">
+						<div class="display">
+							<a onclick="Journal.gridView()" class="grid-view">{{ journal2.settings.get('category_grid_view_icon', button_grid) }}</a>
+							<a onclick="Journal.listView()" class="list-view">{{ journal2.settings.get('category_list_view_icon', button_list) }}</a>
+						  </div>
+						<div class="limit"><b>{{ text_limit }}</b>
+							<select id="input-limit"   onchange="location = this.value;">
+								{% for limits in limits %}
+								{% if limits.value == limit %}
+							  <option value="{{ limits.href }}" selected="selected">{{ limits.text }}</option>
+								{% else %}
+							  <option value="{{ limits.href }}">{{ limits.text }}</option>
+								{% endif %}
+							  {% endfor %}
+							</select>
+						</div>
+						 <div class="sort"><b>{{ text_sort }}</b>
+							<select id="input-sort" class="" onchange="location = this.value;">
+							{% for sorts in sorts %}
+								{% if sorts.value == '%s-%s'|format(sort, order) %}
+							  <option value="{{ sorts.href }}" selected="selected">{{ sorts.text }}</option>
+								{% else %}
+							  <option value="{{ sorts.href }}">{{ sorts.text }}</option>
+								{% endif %}
+							  {% endfor %}
+							</select>
+						</div>
+					</div>
+		<div>
+	     <div class="row main-products product-grid" data-grid-classes="{{ journal2.settings.get('product_grid_classes') }} display-{{ journal2.settings.get('product_grid_wishlist_icon_display') }} {{ journal2.settings.get('product_grid_button_block_button') }}">
+							{% for product in seller_products %}
+							 <div class="product-grid-item {{ journal2.settings.get('product_grid_classes') }}">
+              <div class="product-thumb product-wrapper {% if product.labels and product.labels.outofstock %} outofstock {% endif %}">
+                <div class="image {% if journal2.settings.get('show_countdown', 'never') != 'never' and product.date_end %} has-countdown {% endif %}">
+                  <a href="{{ product.href }}" {% if product.thumb2 %} class="has-second-image" style="background: url('{{ product.thumb2 }}') no-repeat" {% endif %}>
+                    <img class="lazy first-image" width="{{ journal2.settings.get('config_image_width') }}" height="{{ journal2.settings.get('config_image_height') }}" src="{{ journal2.settings.get('product_dummy_image') }}" data-src="{{ product.thumb }}" title="{{ product.name }}" alt="{{ product.name }}"/>
+                  </a>
+                  {% for label, name in product.labels %}
+                    <span class="label-{{ label }}"><b>{{ name }}</b></span>
+                  {% endfor %}
+                  {% if journal2.settings.get('product_grid_wishlist_icon_position') == 'image' and journal2.settings.get('product_grid_wishlist_icon_display') == 'icon' %}
+                    <div class="wishlist"><a onclick="addToWishList('{{ product.product_id }}');" class="hint--top" data-hint="{{ button_wishlist }}"><i class="wishlist-icon"></i><span class="button-wishlist-text">{{ button_wishlist }}</span></a></div>
+                    <div class="compare"><a onclick="addToCompare('{{ product.product_id }}');" class="hint--top" data-hint="{{ button_compare }}"><i class="compare-icon"></i><span class="button-compare-text">{{ button_compare }}</span></a></div>
+                  {% endif %}
+                </div>
+                <div class="product-details">
+                  <div class="caption">
+                    <h4 class="name"><a href="{{ product.href }}">{{ product.name }}</a></h4>
+                    <p class="description">{{ product.description }}</p>
+                    {% if product.price %}
+                      <div class="price">
+                        {% if not product.special %}
+                          {{ product.price }}
+                        {% else %}
+                          <span class="price-old">{{ product.price }}</span> <span class="price-new" {% if product.date_end %}data-end-date="{{ product.date_end }}"{% endif %}>{{ product.special }}</span>
+                        {% endif %}
+                      </div>
+                      {% if product.tax %}
+                        <span class="price-tax">{{ text_tax }} {{ product.tax }}</span>
+                      {% endif %}
+                    {% endif %}
+                    {% if product.rating %}
+                      <div class="rating">
+                        {% for i in 1..5 %}
+                          {% if product.rating < i %}
+                            <span class="fa fa-stack"><i class="fa fa-star-o fa-stack-2x"></i></span>
+                          {% else %}
+                            <span class="fa fa-stack"><i class="fa fa-star fa-stack-2x"></i><i class="fa fa-star-o fa-stack-2x"></i></span>
+                          {% endif %}
+                        {% endfor %}
+                      </div>
+                    {% endif %}
+                  </div>
+                  <div class="button-group">
+                    {% if staticCall('Journal2Utils', 'isEnquiryProduct', [null, product]) %}
+                      <div class="cart enquiry-button">
+                        <a href="javascript:Journal.openPopup('{{ journal2.settings.get('enquiry_popup_code') }}', '{{ product.product_id }}');" data-clk="addToCart('{{ product.product_id }}');" class="button hint--top" data-hint="{{ journal2.settings.get('enquiry_button_text') }}">{{ journal2.settings.get('enquiry_button_icon') }}<span class="button-cart-text">{{ journal2.settings.get('enquiry_button_text') }}</span></a>
+                      </div>
+                    {% else %}
+                      <div class="cart {% if product.labels and product.labels.outofstock %} outofstock {% endif %}">
+                        <a onclick="addToCart('{{ product.product_id }}');" class="button hint--top" data-hint="{{ button_cart }}"><i class="button-left-icon"></i><span class="button-cart-text">{{ button_cart }}</span><i class="button-right-icon"></i></a>
+                      </div>
+                    {% endif %}
+                    <div class="wishlist"><a onclick="addToWishList('{{ product.product_id }}');" class="hint--top" data-hint="{{ button_wishlist }}"><i class="wishlist-icon"></i><span class="button-wishlist-text">{{ button_wishlist }}</span></a></div>
+                    <div class="compare"><a onclick="addToCompare('{{ product.product_id }}');" class="hint--top" data-hint="{{ button_compare }}"><i class="compare-icon"></i><span class="button-compare-text">{{ button_compare }}</span></a></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+							{% endfor %}
+						  </div>
+						    <div class="row pagination">
+          <div class="col-sm-6 text-left links">{{ pagination }}</div>
+          <div class="col-sm-6 text-right results">{{ results }}</div>
+        </div>
+						  {% else %}
+							<div class="pts-text-center"><h3>{{ text_no_results }}</h3></div>
+						  {% endif %}
+						</div>
+						</div>
+					</div>
+				</div>
+			{{ content_bottom }}
+		</div>
+	</div>
+	  <script>Journal.applyView('{{ journal2.settings.get('product_view', 'grid') }}');</script>
+  {% if journal2.settings.get('show_countdown', 'never') != 'never' %}
+    <script>Journal.enableCountdown();</script>
+  {% endif %}
+</div>
+{{ footer }}

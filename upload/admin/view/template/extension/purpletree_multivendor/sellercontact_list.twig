@@ -1,0 +1,181 @@
+{{ header }}{{ column_left }}
+<div id="content">
+  <div class="page-header">
+    <div class="container-fluid">
+      <div class="pull-right">
+        <button type="button" data-toggle="tooltip" title="{{ button_delete }}" class="btn btn-danger" onclick="confirm('{{ text_confirm }}') ? $('#form-contact').submit() : false;"><i class="fa fa-trash-o"></i></button>
+      </div>
+      <h1>{{ heading_title }}</h1>
+      <ul class="breadcrumb">
+        {% for breadcrumb in breadcrumbs %}
+		<li><a href="{{ breadcrumb.href }}">{{ breadcrumb.text }}</a></li>
+		{% endfor %}
+      </ul>
+    </div>
+  </div>
+  <div class="container-fluid">
+	{% if error_warning %}
+    <div class="alert alert-danger"><i class="fa fa-exclamation-circle"></i> {{ error_warning }}
+      <button type="button" class="close" data-dismiss="alert">&times;</button>
+    </div>
+    {% endif %}
+	{% if success %}
+    <div class="alert alert-success"><i class="fa fa-check-circle"></i> {{ success }}
+      <button type="button" class="close" data-dismiss="alert">&times;</button>
+    </div>
+    {% endif %}
+    <div class="panel panel-default">
+      <div class="panel-heading">
+        <h3 class="panel-title"><i class="fa fa-list"></i> {{ text_list }}</h3>
+      </div>
+      <div class="panel-body">
+        <div class="well">
+          <div class="row">
+            <div class="col-sm-6">
+              <div class="form-group">
+                <label class="control-label" for="input-product">{{ text_customer_name }}</label>
+                <input type="text" name="filter_customer_name" value="{{ filter_customer_name }}" placeholder="{{ text_customer_name }}" id="input-product" class="form-control" />
+              </div>
+              <div class="form-group">
+                <label class="control-label" for="input-author">{{ text_seller_name }}</label>
+                <input type="text" name="filter_seller_name" value="{{ filter_seller_name }}" placeholder="{{ text_seller_name }}" id="input-author" class="form-control" />
+              </div>
+            </div>
+            <div class="col-sm-6">
+              <div class="form-group">
+                <label class="control-label" for="input-status">{{ text_email }}</label>
+                <input type="text" name="filter_email" value="{{ filter_email }}" placeholder="{{ text_email }}" id="input-author" class="form-control" />
+              </div>
+              <div class="form-group">
+                <label class="control-label" for="input-date-added">{{ text_date_added }}</label>
+                <div class="input-group date">
+                  <input type="text" name="filter_created_at" value="{{ filter_created_at }}" placeholder="{{ text_date_added }}" data-date-format="YYYY-MM-DD" id="created_at" class="form-control" />
+                  <span class="input-group-btn">
+                  <button type="button" class="btn btn-default"><i class="fa fa-calendar"></i></button>
+                  </span></div>
+				  <input type="hidden" name="seller_id" value="{{ seller_id }}">
+              </div>
+              <button type="button" id="button-filter" class="btn btn-primary pull-right"><i class="fa fa-filter"></i> {{ button_filter }}</button>
+            </div>
+			<div class="colorcoding"><div class="sellercolor"><div class="bluecolor"> </div>{{ text_seller_to_customer }}</div><div class="sellercolor"> <div class="greencolor"></div>{{ text_customer_to_seller }}</div></div>
+          </div>
+        </div>
+        <form action="{{ delete }}" method="post" enctype="multipart/form-data" id="form-contact">
+          <div class="table-responsive">
+            <table class="table table-bordered table-hover">
+              <thead>
+                <tr>
+                  <td style="width: 1px;" class="text-center"><input type="checkbox" onclick="$('input[name*=\'selected\']').prop('checked', this.checked);" /></td>
+					<td class="text-left">{{ text_seller_name }}</td>
+					<td class="text-left"><i class="fa fa-arrows-h" style="font-size:18px"></i></td>
+					<td class="text-left">{{ text_customer_name }}</td>
+					<td class="text-left">{{ text_email }}</td>
+					<td class="text-left">{{ text_description }}</td>
+					<td class="text-left">{{ text_date_added }}</td>
+                  <td class="text-right">{{ column_action }}</td>
+                </tr>
+              </thead>
+              <tbody>
+				{% if sellercontacts %}
+					{% for sellercontact in sellercontacts %}
+					<?php $x=$sellercontact['contact_from']?'To':'From'; ?>
+					{% if sellercontact.contact_from %}
+						{% set x='To' %}
+						{% else %}
+						{% set x='From' %}
+						{% endif %}
+						
+						{% if sellercontact.contact_from %}
+						{% set y='<i class="fa fa-arrow-right"></i>' %}
+						{% else %}
+						{% set y='<i class="fa fa-arrow-left"></i>' %}
+						{% endif %}
+
+                <tr class="{{ x }}" >
+                  <td class="text-center">{% if selected in sellercontact %}
+                    <input type="checkbox" name="selected[]" value="{{ sellercontact.id }}" checked="checked" />
+					{% else %}
+                    <input type="checkbox" name="selected[]" value="{{ sellercontact.id }}" />
+                    {% endif %}</td>
+                  <td class="text-left">{{ sellercontact.seller_name }}</td>
+				  <td class="text-left">{{ y }} </td>
+                  <td class="text-left">{{ sellercontact.customer_name }}</td>
+				  <td class="text-left">{{ sellercontact.customer_email }}</td>
+				  <td class="text-left">{{ sellercontact.customer_message }}</td>
+				  <td class="text-left">{{ sellercontact.date_added }}</td>
+				  <td class="text-right"><a href="{{ sellercontact.view }}" data-toggle="tooltip" title="{{ button_view }}" class="btn btn-primary"><i class="fa fa-eye"></i></a></td>
+                </tr>
+                {% endfor %}
+				{% else %}
+                <tr>
+                  <td class="text-center" colspan="7">{{ text_no_results }}</td>
+                </tr>
+                {% endif %}
+              </tbody>
+            </table>
+          </div>
+        </form>
+        <div class="row">
+          <div class="col-sm-6 text-left">{{ pagination }}</div>
+          <div class="col-sm-6 text-right">{{ results }}</div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <script type="text/javascript"><!--
+$('#button-filter').on('click', function() {
+	url = 'index.php?route=extension/purpletree_multivendor/sellercontacts&user_token={{ user_token}}';
+	
+	var filter_customer_name = $('input[name=\'filter_customer_name\']').val();
+	
+	if (filter_customer_name) {
+		url += '&filter_customer_name=' + encodeURIComponent(filter_customer_name);
+	}
+	
+	var filter_seller_name = $('input[name=\'filter_seller_name\']').val();
+	
+	if (filter_seller_name) {
+		url += '&filter_seller_name=' + encodeURIComponent(filter_seller_name);
+	}
+	
+	var filter_email = $('input[name=\'filter_email\']').val();
+	
+	if (filter_email) {
+		url += '&filter_email=' + encodeURIComponent(filter_email);
+	}		
+			
+	var filter_created_at = $('input[name=\'filter_created_at\']').val();
+	
+	if (filter_created_at) {
+		url += '&filter_created_at=' + encodeURIComponent(filter_created_at);
+	}
+
+	location = url;
+});
+//--></script> 
+  <script type="text/javascript"><!--
+$('.date').datetimepicker({
+	pickTime: false
+});
+//--></script></div>
+{{ footer }}
+<style type="text/css">
+.To{background-color: #e6ffe6;}
+.From{background-color: #e6e6ff !important;}
+.bluecolor {
+    background: #e6ffe6;
+}	
+.greencolor {
+	    background: #e6e6ff;
+}
+.sellercolor div {
+    width: 42px;
+    height: 15px;
+    float: left;
+    margin-right: 10px;
+    margin-top: 3px;
+	border:1px solid #000;
+	
+}
+
+</style>

@@ -1,0 +1,191 @@
+{{ header }}
+<div class="pts-container">
+	<ul class="breadcrumb">
+		{% for breadcrumb in breadcrumbs %}
+		<li><a href="{{ breadcrumb.href }}">{{ breadcrumb.text }}</a></li>
+		{% endfor %}
+	</ul>
+		{% if error_warning %}
+  <div class="alert alert-danger"><i class="fa fa-exclamation-circle"></i> {{ error_warning }}</div>
+	{% endif %}
+	<div class="pts-row">
+		<div id="pts-content" class="col-sm-12">{{ content_top }}
+			{{ content_top }}
+				<h1>{{ store_name }}</h1>
+				<div class="pts-row">
+					<div class="store_top_div clearfix">
+						<div class="pts-col-sm-3  seller_pannel_store">
+							<div class="store_logo pts-text-center">
+								<img class="img-responsive m-auto" src="{{ store_logo }}">
+							</div>
+							<div class="seller-name">
+								<h3 style="margin-top:10px;">{{ seller_name }}</h3>
+							</div>
+							{% if seller_review_status %}
+							{% if store_rating.rating %}
+							<div class="rating pts-text-left">
+							  {% for i in 1..5 %}
+							  {% if store_rating.rating < i %} <span class="fa fa-stack star-seller"><i class="fa fa-star-o fa-stack-2x"></i></span> {% else %} <span class="fa fa-stack star-seller"><i class="fa fa-star fa-stack-2x"></i><i class="fa fa-star-o fa-stack-2x"></i></span> {% endif %}
+							  {% endfor %}({{ store_rating.rating|number_format(1) }})
+							</div>
+							{% else %}
+								{% for i in 1..5 %}
+									<span class="fa fa-stack star-seller"><i class="fa fa-star-o fa-stack-1x"></i></span>
+								{% endfor %}({{ store_rating.rating|number_format(1) }})
+							{% endif %}
+							<div class="store-rating">
+								<a href="{{ store_review }}" target="_blank">{{ text_sellerreview }} ({{ store_rating['count'] }})</a>
+							</div>
+							{% endif %}
+
+							<div class="seller-info" style="">
+								<div class="contact-info">
+								{% if (module_purpletree_multivendor_store_email) is not null %}
+									<div class="seller-email">
+										<div><i class="fa fa-envelope" aria-hidden="true"></i> {{ store_email }}</div>
+									</div>
+								{% endif %}
+								{% if (module_purpletree_multivendor_store_phone) is not null %}
+									<div class="seller-phone">
+										<div><i class="fa fa-phone" aria-hidden="true"></i> {{ store_phone }}</div>
+									</div>
+								{% endif %}
+								{% if (module_purpletree_multivendor_store_address) is not null %}
+									<div class="seller-address">
+										<div><i class="fa fa-home" aria-hidden="true"></i> {{ store_address }}</div>
+									</div>
+								{% endif %}
+								</div>
+								<div class="seller-return">
+									<div>
+										<a href="{{ store_return_policy }}" target="_blank">{{ text_returnpolicy }}
+											<i class="fa fa-angle-right pts-r"></i>
+										</a>
+									</div>
+								</div>
+								<div class="seller-shipping">
+									<div>
+										<a href="{{ store_shipping_policy }}" target="_blank">{{ text_shippingpolicy }}
+											<i class="fa fa-angle-right pts-r"></i>
+										</a>
+									</div>
+								</div>
+								<div class="seller-about">
+									<div>
+										<a href="{{ store_about }}" target="_blank">{{ text_aboutstore }}
+											<i class="fa fa-angle-right pts-r"></i>
+										</a>
+									</div>
+								</div>
+								
+							</div>
+							<div class="seller-return text-center">
+								<div class=" contact_seller_link">
+									<a href="{{ seller_contact }}" class="contact_seller" target="_blank"><img src="image/catalog/contact_seller.png" width="20px" height="20px" style="color:#fff"> {{text_sellercontact }}</a>
+								</div>
+							</div>
+							<div class="seller-name">
+								<h3>{{products_categories}}</h3>
+							</div>
+							<div class="pts-list-group" >
+							{% if categories %}
+								
+								{%for category in categories %}
+								 <a href="{{category['href']}}" class="pts-list-group-item {{category['active']}}">{{ category['name'] }}</a>
+									{% if category.subcategories %}
+										{%for subcat in category.subcategories %}
+											<a href="{{subcat['href']}}" class="pts-list-group-item {{subcat['active']}}"><span>&nbsp;&nbsp;-&nbsp;</span>{{ subcat['name'] }}</a>
+										{% endfor %}
+									{% endif %}
+								{% endfor %}
+							{% endif %}
+							</div>
+						</div>
+						<div class="pts-col-sm-9">
+							<div class="pts-banner">
+								<img class="img-responsive" src="{{ store_banner }}">
+							</div>
+							{% if seller_products %}
+							<div class="pts-row">
+							<div class="pts-col-md-2 pts-col-sm-6 hidden-xs">
+							  
+							</div>
+							<div class="pts-col-md-3 pts-col-sm-6">
+							  
+							</div>
+							<div class="pts-col-md-4 pts-col-xs-6 pull-right ">
+							  <div class="pts-form-group pts-input-group pts-input-group-sm">
+								<label class="pts-input-group-addon" for="input-sort">{{ text_sort }}</label>
+								<select id="input-sort" class="pts-form-control" onchange="location = this.value;">
+								{% for sorts in sorts %}
+									{% if sorts.value == '%s-%s'|format(sort, order) %}
+								  <option value="{{ sorts.href }}" selected="selected">{{ sorts.text }}</option>
+									{% else %}
+								  <option value="{{ sorts.href }}">{{ sorts.text }}</option>
+									{% endif %}
+								  {% endfor %}
+								</select>
+							  </div>
+							</div>
+							<div class="pts-col-md-3 pts-col-xs-6 pull-right"  style="    padding: 0;">
+							  <div class="pts-form-group pts-input-group pts-input-group-sm">
+								<label class="pts-input-group-addon" for="input-limit">{{ text_limit }}</label>
+								<select id="input-limit" class="pts-form-control" onchange="location = this.value;">
+									{% for limits in limits %}
+									{% if limits.value == limit %}
+								  <option value="{{ limits.href }}" selected="selected">{{ limits.text }}</option>
+									{% else %}
+								  <option value="{{ limits.href }}">{{ limits.text }}</option>
+									{% endif %}
+								  {% endfor %}
+								</select>
+							  </div>
+							</div>
+						  </div>
+							<div class="pts-row">
+							{% for product in seller_products %}
+							 {% if product.countttt % 4 == 0 %}
+							<div class="pts-clearfix"></div>
+							{% endif %}
+							<div class="product-layout pts-product-grid pts-col-lg-3 pts-col-md-3 pts-col-sm-6 pts-col-xs-12">
+							  <div class="pts-product-thumb">
+								<div class="image"><a href="{{ product.href }}"><img src="{{ product.image }}" alt="{{ product.name }}" title="{{ product.name }}" class="img-responsive" /></a></div>
+								<div>
+								  <div class="pts-caption">
+									<h4><a href="{{ product.href }}">{{ product.name }}</a></h4>
+									{% if product.price %}
+									<p class="price">
+									{% if not product.special %}
+									  {{ product.price }}
+									  {% else %}
+									  <span class="price-new">{{ product.special }}</span> <span class="price-old">{{ product.price }}</span>
+									  {% endif %}
+									</p>
+									{% endif %}
+								  </div>
+								  <div class="button-group">
+									 <button type="button" onclick="cart.add('{{ product.product_id }}', '{{ product.minimum }}');"><i class="fa fa-shopping-cart"></i> <span class="pts-cartbtnn hidden-xs hidden-sm hidden-md">{{ button_cart }}</span></button>
+									<button type="button" data-toggle="tooltip" title="{{ button_wishlist }}" onclick="wishlist.add('{{ product.product_id }}');"><i class="fa fa-heart"></i></button>
+									<button type="button" data-toggle="tooltip" title="{{ button_compare }}" onclick="compare.add('{{ product.product_id }}');"><i class="fa fa-exchange"></i></button>
+								  </div>
+								</div>
+							  </div>
+							</div>
+							{% endfor %}
+						  </div>
+						  <div class="pts-row">
+							<div class="pts-col-sm-6 pts-text-left">{{ pagination }}</div>
+							<div class="pts-col-sm-6 pts-text-right">{{ results }}</div>
+						  </div>
+						  {% else %}
+							<div class="pts-text-center"><h3>{{ text_no_results }}</h3></div>
+						  {% endif %}
+						</div>
+					</div>
+				</div>
+			{{ content_bottom }}
+		</div>
+	</div>
+</div>
+
+{{ footer }}

@@ -1,0 +1,218 @@
+{{ header }}
+<div class="pts-container">
+  <ul class="pts-breadcrumb">
+	{% for breadcrumb in breadcrumbs %}
+    <li><a href="{{ breadcrumb.href }}">{{ breadcrumb.text }}</a></li>
+	{% endfor %}
+  </ul>
+  <div class="successdiv">
+  {% if success %}
+  <div class="alert pts-alert-success"><i class="fa fa-check-circle"></i> {{ success }}</div>
+	{% endif %}
+   </div>
+   <div class="errordiv">
+	{% if error_warning %}
+  <div class="alert alert-danger"><i class="fa fa-exclamation-circle"></i> {{ error_warning }}</div>
+	{% endif %}
+	</div>
+  <div class="pts-row">{{ column_left }}
+	{% if column_left and column_right %}
+    {% set class = 'pts-col-sm-6' %}
+    {% elseif column_left or column_right %}
+    {% set class = 'pts-col-sm-9' %}
+    {% else %}
+    {% set class = 'pts-col-sm-12' %}
+    {% endif %}
+    <div id="pts-content" class="{{ class }}">{{ content_top }}
+	<div class="pts-pull-right">
+      </div>
+      <h1>{{ heading_title }}</h1>
+      <div class="pts-panel-body">
+        <div class="pts-well">
+          <div class="pts-row">
+            <div class="pts-col-sm-4">
+              <div class="pts-form-group ptsnewcss">
+                <label class="pts-control-label" for="input-name">{{ entry_name }}</label>
+                <input type="text" name="filter_name" value="{{ filter_name }}" placeholder="{{ entry_name }}" id="input-name" class="pts-form-control" />
+              </div>
+              <div class="pts-form-group ptsnewcss">
+                <label class="pts-control-label" for="input-model">{{ entry_model }}</label>
+                <input type="text" name="filter_model" value="{{ filter_model }}" placeholder="{{ entry_model }}" id="input-model" class="pts-form-control" />
+              </div>
+            </div>
+            <div class="pts-col-sm-4">
+              <div class="pts-form-group">
+                <label class="pts-control-label" for="input-price">{{ entry_price }}</label>
+                <input type="text" name="filter_price" value="{{ filter_price }}" placeholder="{{ entry_price }}" id="input-price" class="pts-form-control" />
+              </div>
+              <div class="pts-form-group">
+                <label class="pts-control-label" for="input-quantity">{{ entry_quantity }}</label>
+                <input type="text" name="filter_quantity" value="{{ filter_quantity }}" placeholder="{{ entry_quantity }}" id="input-quantity" class="pts-form-control" />
+              </div>
+            </div>
+            <div class="pts-col-sm-4">
+              <div class="pts-form-group">
+                <label class="pts-control-label" for="input-status">{{ entry_status }}</label>
+                <select name="filter_status" id="input-status" class="pts-form-control">
+                  <option value="*">{{ text_all }}</option>
+                  {% if filter_status =='1' %}
+                  <option value="1" selected="selected">{{ text_enabled }}</option>
+                  {% else %}
+                  <option value="1">{{ text_enabled }}</option>
+                  {% endif %}
+                  {% if filter_status =='0' %}
+                  <option value="0" selected="selected">{{ text_disabled }}</option>
+                  {% else %}
+                  <option value="0">{{ text_disabled }}</option>
+                  {% endif %}
+                </select>
+              </div>
+              <button type="button" id="pts-button-filter" class="pts-btn pts-btn-primary pts-pull-right"><i class="fa fa-filter"></i> {{ button_filter }}</button>
+            </div>
+          </div>
+        </div>
+        <form action="" method="post" enctype="multipart/form-data" id="form-product">
+          <div class="pts-table-responsive">
+            <table class="pts-table pts-table-bordered pts-table-hover">
+              <thead>
+                <tr>
+                  <td style="width: 1px;" class="pts-text-center"><input type="checkbox" onclick="$('input[name*=\'selected\']').prop('checked', this.checked);" /></td>
+                  <td class="pts-text-center">{{ column_image }}</td>
+                  <td class="pts-text-left">{{ column_name }}</td>
+                  <td class="pts-text-left">{{ column_model }}</td>
+                  <td class="pts-text-right">{{ column_price }}</td>
+                  <td class="pts-text-right">{{ column_quantity }}</td>
+                  <td class="pts-text-left">{{ column_status }}</td>
+                  <td class="pts-text-left">{{ column_approved }}</td>
+                </tr>
+              </thead>
+              <tbody>
+				{% if products %}
+					{% for product in products %}
+                <tr>
+                  <td class="pts-text-center">{% if selected in product.product_id %}
+                    <input type="checkbox" name="selected[]" value="{{ product.product_id }}" checked="checked" />
+                    {% else %}
+                    <input type="checkbox" name="selected[]" value="{{ product.product_id }}" />
+                    {% endif %}</td>
+                  <td class="pts-text-center">{% if product.image %}
+                    <img src="{{ product.image }}" alt="{{ product.name }}" class="img-thumbnail" />
+                    {% else %}
+                    <span class="img-thumbnail list"><i class="fa fa-camera fa-2x"></i></span>
+                    {% endif %}</td>
+                  <td class="pts-text-left">{{ product.name }}</td>
+                  <td class="pts-text-left">{{ product.model }}</td>
+                  <td class="pts-text-right">{% if product.special %}
+                    <span style="text-decoration: line-through;">{{ product.price }}</span><br/>
+                    <div class="text-danger">{{ product.special }}</div>
+                    {% else %}
+                    {{ product.price }}
+                    {% endif %}</td>
+                  <td class="pts-text-right">{% if product.quantity <= 0 %}
+                    <span class="label label-warning">{{ product.quantity }}</span>
+						{% elseif product.quantity <= 5 %}
+                    <span class="label label-danger">{{ product.quantity }}</span>
+                    {% else %}
+                    <span class="label label-success">{{ product.quantity }}</span>
+                    {% endif %}</td>
+                  <td class="pts-text-left">{{ product.status }}</td>
+                  <td class="pts-text-left">{{ product.is_approved }}</td>
+                </tr>
+                {% endfor %}
+                {% else %}
+                <tr>
+                  <td class="pts-text-center" colspan="11">{{ text_no_results }}</td>
+                </tr>
+                {% endif %}
+              </tbody>
+            </table>
+          </div>
+        </form>
+        <div class="pts-row">
+          <div class="pts-col-sm-6 pts-text-left">{{ pagination }}</div>
+          <div class="pts-col-sm-6 pts-text-right">{{ results }}</div>
+        </div>
+      </div>
+      {{ content_bottom }}</div>
+    {{ column_right }}</div>
+</div>
+<script type="text/javascript"><!--
+
+$('#pts-button-filter').on('click', function() {
+	var url = 'index.php?route=extension/account/purpletree_multivendor/sellerproduct';
+
+	var filter_name = $('input[name=\'filter_name\']').val();
+
+	if (filter_name) {
+		url += '&filter_name=' + encodeURIComponent(filter_name);
+	}
+
+	var filter_price = $('input[name=\'filter_price\']').val();
+
+	if (filter_price) {
+		url += '&filter_price=' + encodeURIComponent(filter_price);
+	}
+
+	var filter_quantity = $('input[name=\'filter_quantity\']').val();
+
+	if (filter_quantity) {
+		url += '&filter_quantity=' + encodeURIComponent(filter_quantity);
+	}
+
+	var filter_status = $('select[name=\'filter_status\']').val();
+
+	if (filter_status != '*') {
+		url += '&filter_status=' + encodeURIComponent(filter_status);
+	}
+
+  var filter_model = $('input[name=\'filter_model\']').val();
+
+  if (filter_model != '*') {
+    url += '&filter_model=' + encodeURIComponent(filter_model);
+  }
+
+	location = url;
+});
+//--></script>
+  <script type="text/javascript"><!--
+$('input[name=\'filter_name\']').autocompletepts({
+	'source': function(request, response) {
+		$.ajax({
+			url: 'index.php?route=extension/account/purpletree_multivendor/sellerproduct/autocomplete&filter_name=' +  encodeURIComponent(request),
+			dataType: 'json',
+			success: function(json) {
+				response($.map(json, function(item) {
+					return {
+						label: item['name'],
+						value: item['product_id']
+					}
+				}));
+			}
+		});
+	},
+	'select': function(item) {
+		$('input[name=\'filter_name\']').val(item['label']);
+	}
+});
+
+$('input[name=\'filter_model\']').autocompletepts({
+	'source': function(request, response) {
+		$.ajax({
+			url: 'index.php?route=extension/account/purpletree_multivendor/sellerproduct/autocomplete&filter_model=' +  encodeURIComponent(request),
+			dataType: 'json',
+			success: function(json) {
+				response($.map(json, function(item) {
+					return {
+						label: item['model'],
+						value: item['product_id']
+					}
+				}));
+			}
+		});
+	},
+	'select': function(item) {
+		$('input[name=\'filter_model\']').val(item['label']);
+	}
+});
+//--></script>
+{{ footer }}

@@ -1,0 +1,63 @@
+{{ header }}
+<div class="pts-container">
+	<ul class="pts-breadcrumb">
+		{% for breadcrumb in breadcrumbs %}
+		<li><a href="{{ breadcrumb.href }}">{{ breadcrumb.text }}</a></li>
+		{% endfor %}
+	</ul>
+    {% if error_warning %}
+    <div class="alert alert-danger"><i class="fa fa-exclamation-circle"></i> {{ error_warning }}
+      <button type="button" class="close" data-dismiss="alert">&times;</button>
+    </div>
+    {% endif %}
+	 <div class="row">{{ column_left }}
+    {% if column_left and column_right %}
+    {% set class = 'pts-col-sm-6' %}
+    {% elseif column_left or column_right %}
+    {% set class = 'pts-col-sm-9' %}
+    {% else %}
+    {% set class = 'pts-col-sm-12' %}
+    {% endif %}
+		
+    <div id="pts-content" class="{{ class }}"> {{ content_top }}
+      <h1>{{ heading_title }}</h1>
+			 
+		<div class="">
+			<div class="pts-col-md-12 pts-col-xs-12 ">
+				<div class="col-md-12 pts-col-xs-12 account-bg">
+					<div class="pts-col-md-4 pts-col-xs-12">
+						<h4 class="text-left"> {{ text_Seller_Account }}</h4>
+						<hr style="    width: 50%;margin-left: 0;margin-top: 13px;border: 1px solid #1f93bf;">
+						<a href="{{ sellerorder }}"><img src="image/catalog/dashboardicon/shipping-icon-0.png"  class="sellerAccountImg"/>{{ text_Orders }}</a><br>
+						<a href="{{ sellerproduct }}"><img src="image/catalog/dashboardicon/myfinacle.png" class="sellerAccountImg"/>{{ text_Manage_products }}</a><br>
+						<a href="{{ sellerenquiry }}"><img src="image/catalog/dashboardicon/enquiry.png" class="sellerAccountImg"/>{{ text_Customer_Enquiries }}</a><br>
+                        <a href="{{ sellerreview }}"><img src="image/catalog/dashboardicon/review-icon-2.png" class="sellerAccountImg"/>{{ text_reviews }}</a><br>			
+					</div>
+					<div class="pts-col-md-4 pts-col-xs-12">
+						<h4 class="text-left "> {{ text_Seller_Store}} </h4>
+						<hr style="    width: 50%;margin-left: 0;margin-top: 13px;border: 1px solid #1f93bf;">
+						<a href="{{ sellerview }}"><img src="image/catalog/dashboardicon/view1.jpg"  class="sellerAccountImg"/>{{ text_View_Store }}</a><br>
+						<a href="{{ sellerstore }}"><img src="image/catalog/dashboardicon/shop.png" class="sellerAccountImg"/>{{ text_Store_information }}</a><br>					
+						
+						{% if subscriptionplan %}
+							<a href="{{ subscriptionplan }}"><img src="image/catalog/dashboardicon/subscription.png"  class="sellerAccountImg"/>{{ text_Subscription_plan }}</a><br>
+							
+							 {% if subscriptions %}
+							<a href="{{ subscriptions }}"><img src="image/catalog/dashboardicon/invoice.png"  class="sellerAccountImg"/>{{ text_Subscription_Invoice }}</a><br>
+						  {% endif %}
+					{% endif %}
+					</div>
+					<div class="pts-col-md-4 pts-col-xs-12">
+						<h4 class="text-left"> {{ text_Seller_Payments }}</h4>
+						<hr style="    width: 50%;margin-left: 0;margin-top: 13px;border: 1px solid #1f93bf;">
+						<a href="{{ sellercommission }}"><img src="image/catalog/dashboardicon/commission.png"  class="sellerAccountImg"/>{{ text_Commisions }}</a><br>
+						
+					</div>
+				</div>
+			</div>
+		  </div>
+	
+      {{ content_bottom }}</div>
+    {{ column_right }}</div>
+</div>
+{{ footer }}

@@ -1,0 +1,106 @@
+{{ header }}
+<div id="product-category" class="pts-container">
+  <ul class="pts-breadcrumb">
+    {% for breadcrumb in breadcrumbs %}
+    <li><a href="{{ breadcrumb.href }}">{{ breadcrumb.text }}</a></li>
+    {% endfor %}
+  </ul>
+  	{% if error_warning %}
+  <div class="alert alert-danger"><i class="fa fa-exclamation-circle"></i> {{ error_warning }}</div>
+	{% endif %}
+  <div class="pts-row">
+    <div id="content" class="pts-col-sm-12" style="width:100% !important">{{ content_top }}
+      <h2>{{ heading_title }}</h2>
+      {% if sellers %}
+		<div class="pts-row">
+        <div class="pts-col-md-4 pts-col-sm-4">
+			<div class="search_seller">
+				<div class="pts-input-group" id="search-pts">
+					<input type="text" class="pts-form-control pts-input-lg search" placeholder="{{ text_refine }}" value="{{ filter }}" name="{{ text_refine }}">
+					<span class="pts-input-group-btn"><button class="pts-btn pts-btn-default pts-btn-lg" type="button"><i class="fa fa-search"></i></button></span>
+				</div>
+			</div>
+        </div>
+		<div class="pts-col-md-3 pts-col-sm-3">
+		</div>
+        <div class="pts-col-md-3 pts-col-xs-6 pts-col-sm-3">
+          <div class="pts-form-group pts-input-group pts-input-group-sm ptssortcss">
+            <label class="pts-input-group-addon" for="input-sort">{{ text_sort }}</label>
+            <select id="input-sort" class="pts-form-control" onchange="location = this.value;">
+              {% for sorts in sorts %}
+              {% if sorts.value == '%s-%s'|format(sort, order) %}
+              <option value="{{ sorts.href }}" selected="selected">{{ sorts.text }}</option>
+              {% else %}
+              <option value="{{ sorts.href }}">{{ sorts.text }}</option>
+              {% endif %}
+              {% endfor %}
+            </select>
+          </div>
+        </div>
+        <div class="pts-col-md-2 pts-col-xs-6 pts-col-sm-2">
+          <div class="pts-form-group pts-input-group pts-input-group-sm ptssortcss">
+            <label class="pts-input-group-addon" for="input-limit">{{ text_limit }}</label>
+            <select id="input-limit" class="pts-form-control" onchange="location = this.value;">
+              {% for limits in limits %}
+              {% if limits.value == limit %}
+              <option value="{{ limits.href }}" selected="selected">{{ limits.text }}</option>
+              {% else %}
+              <option value="{{ limits.href }}">{{ limits.text }}</option>
+              {% endif %}
+              {% endfor %}
+            </select>
+          </div>
+        </div>
+      </div>
+		{% for seller in sellers %}
+
+		<div class="purpletree_seller clearfix">
+			<div class="pts-col-sm-2 pts-col-md-2 pts-col-xs-6">
+				<a href="{{ seller.href  }}"><img src="{{ seller.seller_thumb }}" alt="{{ seller.seller_name }}" title="{{ seller.seller_name }}" class="img-thumbnail" /></a>
+			</div>
+			<div class="pts-col-sm-3 pts-col-md-3 pts-col-xs-6">
+				<p><a href="{{ seller.href  }}"><h3><strong>{{ seller.seller_name }}</strong></h3></a></p>
+				<p>{{ seller.seller_address }}, {{ seller.seller_country }}</p>
+				<p><a href="{{ seller.seller_contact  }}">{{ text_sellercontact }}</a></p>
+			</div>
+			<div class="pts-col-sm-7 pts-col-md-7 pts-col-xs-12">
+				<div class="seller_product">
+					<div class="product_count">
+					<h3 class="pts-text-center">{{ seller.product_total }}</h3>
+					<div class="text-center">{{ text_product }}</div>
+					</div>
+				</div>
+				{% if seller.products %}
+					{% for product in seller.products %}
+						<div class="seller_product">
+							<a href="{{ product.href }}"><img src="{{ product.thumb }}" alt="{{ seller.seller_name }}" title="{{ seller.seller_name }}" class="img-thumbnail" /></a>
+						</div>
+					{% endfor %}
+				{% endif %}
+			</div>
+		</div>
+	
+		{% endfor %}
+      <div class="pts-row">
+        <div class="pts-col-sm-6 pts-text-left">{{ pagination }}</div>
+        <div class="pts-col-sm-6 pts-text-right">{{ results }}</div>
+      </div>
+      {% endif %}
+	  {% if not sellers %}
+      <p>{{ text_empty }}</p>
+      <div class="pts-buttons">
+        <div class="pts-pull-right"><a href="{{ continue }}" class="btn btn-primary">{{ button_continue }}</a></div>
+      </div>
+      {% endif %}
+      {{ content_bottom }}</div>
+	  </div>
+</div>
+<script>
+	$(document).ready(function(){
+		$('.search_seller .pts-btn').click(function(){
+			var search_text = $('.search_seller .search').val();
+			window.location.href = 'index.php?route=extension/account/purpletree_multivendor/sellers&search_text=' +  search_text;
+		});
+	});
+</script>
+{{ footer }} 

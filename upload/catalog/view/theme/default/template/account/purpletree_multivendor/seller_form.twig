@@ -1,0 +1,57 @@
+{{ header }}
+<div class="pts-container">
+  <ul class="pts-breadcrumb">
+	{% for breadcrumb in breadcrumbs %}
+    <li><a href="{{ breadcrumb.href }}">{{ breadcrumb.text }}</a></li>
+	{% endfor %}
+  </ul>
+  <div class="pts-row">{{ column_left }}
+	{% if column_left and column_right %}
+    {% set class = 'pts-col-sm-6' %}
+    {% elseif column_left or column_right %}
+    {% set class = 'pts-col-sm-9' %}
+    {% else %}
+    {% set class = 'pts-col-sm-12' %}
+    {% endif %}
+    <div id="pts-content" class="{{ class }}">{{ content_top }}
+      <form action="{{ action }}" method="post" enctype="multipart/form-data" class="pts-form-horizontal">
+        <fieldset>
+			<legend>{% if is_removed %}
+				{{ text_remove_msg }}
+			{% else %}
+				{{ text_seller_heading }}
+			{% endif %}
+			</legend>
+				<div class="pts-form-group">
+				<label class="pts-col-sm-2 pts-control-label">{{ text_seller }}</label>
+				<div class="pts-col-sm-10">
+				<label class="radio-inline">
+                <input type="radio" name="become_seller" value="1" {% if become_seller  %}  checked="checked" {% endif %} id="add_document" />
+                {{ text_yes }}</label>
+				<label class="radio-inline">
+                <input type="radio" name="become_seller" value="0" {% if not become_seller  %} checked="checked" {% endif %} id="remove_document"/>
+                {{ text_no }}</label>
+            </div>
+            </div>
+			{% if not is_removed %}
+			<div class="pts-form-group required">
+				<label class="pts-col-sm-2 pts-control-label">{{ text_store_name }}</label>
+				<div class="pts-col-sm-10">
+                <input type="text" name="seller_storename" value="{{ seller_storename }}" class="pts-form-control"  />
+				{% if error_sellerstore %}
+              <div class="text-danger">{{ error_sellerstore }}</div>
+              {% endif %}
+            </div>
+            </div>
+			{% endif %}
+		</fieldset>
+        <div class="buttons clearfix">
+          <div class="pts-pull-right">
+            <input type="submit" value="{{ button_continue }}" class="pts-btn pts-btn-primary" />
+          </div>
+        </div>
+      </form>
+      {{ content_bottom }}</div>
+    {{ column_right }}</div>
+</div>
+{{ footer }}

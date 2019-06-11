@@ -1,0 +1,202 @@
+{{ header }}
+{{ column_left }}
+<div id="content">
+  <div class="page-header">
+    <div class="container-fluid">
+      <h1>{{ heading_title }}</h1>
+      <ul class="breadcrumb">
+	  {% for breadcrumb in breadcrumbs %}
+        <li><a href="{{ breadcrumb.href }}">{{ breadcrumb.text }}</a></li>
+		{% endfor %}
+      </ul>
+    </div>
+  </div>
+  <div class="container-fluid">
+	{% if error_warning %}
+    <div class="alert alert-danger"><i class="fa fa-exclamation-circle"></i> {{ error_warning }}
+      <button type="button" class="close" data-dismiss="alert">&times;</button>
+    </div>
+    {% endif %}
+	{% if success %}
+    <div class="alert alert-success"><i class="fa fa-check-circle"></i> {{ success }}
+      <button type="button" class="close" data-dismiss="alert">&times;</button>
+    </div>
+    {% endif %}
+    <div class="panel panel-default">
+      <div class="panel-heading">
+        <h3 class="panel-title"><i class="fa fa-list"></i> {{ text_list }}</h3>
+      </div>
+	  
+      <div class="panel-body">
+	  <form action="{{ action }}" method="post" enctype="multipart/form-data" id="form-customer">
+        <div class="well">
+          <div class="row">
+		   <div class="panel-heading">
+             <h4 class="panel-title"> {{ text_add_commission }}</h4>
+           </div>
+		  
+				<div class="col-sm-4" >
+				  <div class="form-group catdivdrop">
+				   <input type="hidden" name="filter_id" value="" class="form-control" />
+					<label class="control-label" for="input-name">{{ entry_categories }}</label>
+					<input type="text" name="filter_name" value="{{ filter_name }}" placeholder="{{ entry_categories }}" id="input-name" class="form-control" />
+				  </div>
+				</div>  
+				
+				<div class="col-sm-4">
+				  <div class="form-group">
+					<label class="control-label" for="input-commission">{{ entry_commission }}</label>
+					<input type="text" name="filter_commission" value="{{ filter_commission }}"  placeholder="{{entry_commission }}"  class="form-control" />
+				  </div>
+				</div>
+				<div class="col-sm-4">
+				  <div class="form-group">
+					<label class="control-label" for="input-commission">{{ entry_commission_fixed }}</label>
+					<input type="text" name="filter_commission_fixed" value="{{ filter_commission_fixed }}"  placeholder="{{entry_commission_fixed }}"  class="form-control" />
+				  </div>
+				</div>
+				{% if show_seller_group == 1 %}
+				<div class="col-sm-4">
+				  <div class="form-group">
+					<label class="control-label" for="input-commission">{{ entry_seller_group }}</label>
+					<select name="filter_seller_group" class="form-control">
+					{% for seller_group in seller_groups %}
+					<option value="{{ seller_group.customer_group_id }}">{{ seller_group.name }}</option>
+					{% endfor %}
+					</select>
+				  </div>
+				</div>
+				{% endif %}
+				<div class="col-sm-4">
+				  <div class="form-group">
+				  <input type="submit" value="{{ button_add1 }}" class="btn btn-primary" class="button-add" data-toggle="tooltip" title="{{ button_add }}" style=" padding: 8px 20px 8px 20px; margin: 22px 10px 0px 10px;" >				  
+					
+				  </div>
+				</div>
+             
+            </div>
+          </div>
+		  </form>
+        </div>
+		  <div class="panel-body">
+        <form action="{{ delete }}" method="post" enctype="multipart/form-data" id="form-customer">
+		<div class="panel-heading" style="border-width: 1px; border-top-style: solid; border-left-style: solid; border-right-style: solid;">
+             <h4 class="panel-title"> {{ text_Available_commission }}</h4>
+           </div>
+          <div class="table-responsive">
+            <table class="table table-bordered table-hover">
+              <thead>
+                <tr>
+                  <td style="width: 1px;" class="text-center"><input type="checkbox" onclick="$('input[name*=\'selected\']').prop('checked', this.checked);" /></td>
+                  <td class="text-left">{{ column_categories }}</td>
+                  <td class="text-left">{% if sort == 'column_commission' %}
+                    <a href="{{ sort_commission }}" class="{{ order|lower }}">{{ column_commission }}</a>
+                    {% else %}
+                    <a href="{{ sort_commission }}">{{ column_commission }}</a>
+                    {% endif %}</td>
+                    <td class="text-left">{{ column_commission_fixed }}</td>
+					{% if show_seller_group == 1 %}
+                    <td class="text-left">{{ column_seller_group }}</td>
+					{% endif %}					
+                  
+                  <td class="text-center">{{ column_action }}</td>
+                </tr>
+              </thead>
+              <tbody>
+			  
+                {% if commissions %}
+				{% for commission in commissions  %}
+					
+                <tr>
+                  <td class="text-center">{% if selected in commission.commission_id %}
+                    <input type="checkbox" name="selected[]" value="{{ commission.commission_id }}" checked="checked" />
+					{% else %}
+                    <input type="checkbox" name="selected[]" value="{{ commission.commission_id }}" />
+					{% endif %}</td>
+                  <td class="text-left">{{ commission.name }}</td>
+                  <td class="text-left">{{ commission.commission }}</td>
+				  <td class="text-left">{{ commission.commission_fixed }}</td>
+				  {% if show_seller_group == 1 %}
+                  <td class="text-left">{{ commission.seller_group }}</td>
+				  {% endif %}
+                  <td class="text-center">
+                    <a href="{{ commission.editaction }}" data-toggle="tooltip" title="{{ button_edit }}" class="btn btn-primary"><i class="fa fa-pencil"></i></a>
+					
+					<a onclick="checkdata(event)" href="{{ commission.deleteaction }}" data-toggle="tooltip" title="{{ button_delete }}" class="btn btn-danger" ><i class="fa fa-trash-o " ></i></a>
+				 </td>
+				
+                </tr>
+                {% endfor %}
+				{% else %}
+                <tr>
+                  <td class="text-center" colspan="8">{{ text_no_results }}</td>
+                </tr>
+                {% endif %}
+              </tbody>
+            </table>
+          </div>
+        </form>
+        <div class="row">
+          <div class="col-sm-6 text-left">{{ pagination }}</div>
+          <div class="col-sm-6 text-right">{{ results }}</div>
+        </div>
+      </div>
+      </div>
+    </div>
+  </div>
+	 <script type="text/javascript"><!--
+$('#button-filter').on('click', function() {
+url = 'index.php?route=extension/purpletree_multivendor/categoriescommission&user_token={{ user_token }}';
+
+var filter_name = $('input[name=\'filter_name\']').val();
+var filter_id = $('input[name=\'filter_id\']').val();
+
+if (filter_name) {
+url += '&filter_name=' + encodeURIComponent(filter_name)+'&cat_id='+filter_id;
+}
+
+location = url;
+});
+//--></script> 
+<script type="text/javascript"><!--
+$('input[name=\'filter_name\']').autocomplete({
+'source': function(request, response) {
+$.ajax({
+url: 'index.php?route=extension/purpletree_multivendor/categoriescommission/autocomplete&user_token={{ user_token }}&filter_name=' +  encodeURIComponent(request),
+
+dataType: 'json',	
+success: function(json) {
+response($.map(json, function(item) {
+return {
+label: item['name'],
+value: item['vendor_id']
+}
+}));
+}
+});
+},
+'select': function(item) {
+$('input[name=\'filter_name\']').val(item['label']);
+$('input[name=\'filter_id\']').val(item['value']);
+}	
+});
+
+
+//--></script> 
+ <script>
+				 function checkdata(e){			
+				  if (confirm("{{ text_confirm }}")) {
+				  
+				  } else {
+				  e.preventDefault();
+				  }	  
+                  }
+</script>
+<style>
+.catdivdrop ul{
+	overflow: auto;
+	max-height: 120px;
+	width: 91%;
+}
+</style>
+{{ footer }} 

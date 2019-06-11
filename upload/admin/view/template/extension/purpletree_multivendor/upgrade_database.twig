@@ -1,0 +1,51 @@
+{{ header }}
+{{ column_left }}
+<div id="content">
+  <div class="page-header">
+    <div class="container-fluid">
+      <h1>{{ heading_title }}</h1>
+      <ul class="breadcrumb">
+	  {% for breadcrumb in breadcrumbs %}
+        <li><a href="{{ breadcrumb.href }}">{{ breadcrumb.text }}</a></li>
+		{% endfor %}
+      </ul>
+    </div>
+  </div>
+  <div class="container-fluid">
+	{% if error_warning %}
+    <div class="alert alert-danger"><i class="fa fa-exclamation-circle"></i> {{ error_warning }}
+      <button type="button" class="close" data-dismiss="alert">&times;</button>
+    </div>
+    {% endif %}
+	{% if success %}
+    <div class="alert alert-success"><i class="fa fa-check-circle"></i> {{ success }}
+      <button type="button" class="close" data-dismiss="alert">&times;</button>
+    </div>
+    {% endif %}
+    <div class="panel panel-default">
+      <div class="panel-heading">
+        <h3 class="panel-title"><i class="fa fa-list"></i> {{ text_upgrade_database }}</h3>
+      </div>
+	  
+      <div class="panel-body">
+	  <form action="{{ action }}" method="post" enctype="multipart/form-data" id="form-customer">
+        <div class="well">
+          <div class="row">
+		  	  
+				<label class="control-label" for="input-name" style=" padding: 0px 0px 0px 8px; ">{{ text_upgrade_info }}</label>
+				<div class="col-sm-12" style="text-align:left;">
+				  <div class="form-group">
+				  	<a href="{{url}}" data-toggle="tooltip" title="{{ button_Upgrade }}"><input type="button" value="{{ button_Upgrade }}" class="btn btn-primary" class="button_add"  style=" padding: 8px 20px 8px 20px; " ></a>
+					
+				  </div>
+				</div>
+             
+            </div>
+          </div>
+		  </form>
+        </div>       
+      </div>
+    </div>
+  </div>
+
+{{ footer }} 

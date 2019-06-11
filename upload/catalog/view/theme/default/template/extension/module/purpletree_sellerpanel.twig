@@ -1,0 +1,77 @@
+{%  if isSeller.store_status is defined %}
+ {% if isSeller.store_status %}
+<div class="pts-list-group">
+  <h1 class="pts-seller-heading">&nbsp;{{ text_selleroption }}</h1>	
+  <a class="pts-list-group-item" href="{{ dashboardicons }}">{{ text_dashboard_icon }}</a>
+  <a class="pts-list-group-item" href="{{ dashboard }}">{{ text_dashboard }}</a>
+  <a class="pts-list-group-item" href="{{ sellerprofile }}">{{ text_sellerprofile }}</a>
+  <a class="pts-list-group-item" href="{{ sellerstore }}" >{{ text_sellerstore }}</a> 
+  <a class="pts-list-group-item" href="{{ sellerproduct }}" >{{ text_sellerproduct }}</a>
+
+  <a class="pts-list-group-item" href="{{ sellerorder }}" >{{ text_sellerorder }}</a>
+
+  <a class="pts-list-group-item" href="{{ sellerview }}" target="_blank" >{{ text_sellerview }}</a>
+  <a class="pts-list-group-item" href="{{ sellerreview }}" >{{ text_sellerreview }}</a>
+  <a class="pts-list-group-item" href="{{ sellerenquiry }}" >{{ text_sellerenquiry }}</a>
+  <a class="pts-list-group-item" href="{{ removeseller }}" onclick="return confirm('Are you sure?')" ><b>{{ text_removeseller }}</b></a>
+  </div>
+  {% else %}
+ <div class="pts-list-group">
+  {% if isSeller.is_removed %}
+  <a class="pts-list-group-item" href="{{ becomeseller }}">{{ text_becomeseller }}</a>
+ {% else %}
+  <a class="pts-list-group-item" javascript="void(0)">{{ text_approval }}</a>
+  {% endif %}
+  </div>
+  {% endif %}
+  
+ <script>
+ $(document).ready(function(){
+	
+		if ($(window).width() < 768) {
+		   $('.pts-list-group').parent().addClass('pts-column-right-sellerpanel');
+		}
+	});
+ </script>
+ <style>
+ @media only screen and (max-width: 760px) {
+	 .pts-column-right-sellerpanel,#column-right {
+		display:block !important;
+		margin: 0 auto;
+		width: 100%;
+		padding: 30px;
+		z-index: 99 !important;
+	 }
+ }
+ </style>
+  {% endif %} 
+  
+  {% if logged %}
+ {% if module_purpletree_multivendor_status %}
+ {% if isSeller.store_status is empty %}
+<div class="pts-list-group">
+ <a class="pts-list-group-item" href="{{ becomeseller }}" >{{ text_becomeseller }}</a>
+  </div>
+ <script>
+ $(document).ready(function(){
+	
+		if ($(window).width() < 768) {
+		   $('.pts-list-group').parent().addClass('pts-column-right-sellerpanel');
+		}
+	});
+ </script>
+ <style>
+ @media only screen and (max-width: 760px) {
+	 .pts-column-right-sellerpanel,#column-right {
+		display:block !important;
+		margin: 0 auto;
+		width: 100%;
+		padding: 30px;
+		z-index: 99 !important;
+	 }
+ }
+ </style>
+ {% endif %}
+ {% endif %}
+ {% endif %}
+ 
