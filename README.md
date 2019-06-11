@@ -2,7 +2,7 @@
 
 This is the original OpenCart Multivendor extension from Purpletree Software LLP.
 
-This extension is #1 bestseller on Opencart Marketplace among all Multivendor extensions.
+This extension is #1 bestseller on OpenCart Marketplace among all Multivendor extensions.
 
 On this page you can access the free version. Pro version is available [here](https://www.opencart.com/index.php?route=marketplace/extension/info&extension_id=31461).
 
@@ -30,7 +30,7 @@ On this page you can access the free version. Pro version is available [here](ht
 16.    Thai
 17.    Malaysian
 
-- Order can be placed with items from diffirent venors in the same cart.
+- Order can be placed with items from different vendors in the same cart.
 
 - Vendors can process their portion of the order separately.
 
