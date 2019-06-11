@@ -1,6 +1,6 @@
 # OpenCart Multi Vendor
 
-This is the original OpenCart Multivendor extension from Purpletree SOftware LLP.
+This is the original OpenCart Multivendor extension from Purpletree Software LLP.
 
 This extension is #1 bestseller on Opencart Marketplace among all Multivendor extensions.
 
